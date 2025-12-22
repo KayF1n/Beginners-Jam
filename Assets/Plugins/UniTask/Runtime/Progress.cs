@@ -1,22 +1,18 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks.Internal;
+using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks.Internal;
 
-namespace Cysharp.Threading.Tasks
-{
+namespace Cysharp.Threading.Tasks {
     /// <summary>
     /// Lightweight IProgress[T] factory.
     /// </summary>
-    public static class Progress
-    {
-        public static IProgress<T> Create<T>(Action<T> handler)
-        {
+    public static class Progress {
+        public static IProgress<T> Create<T>(Action<T> handler) {
             if (handler == null) return NullProgress<T>.Instance;
             return new AnonymousProgress<T>(handler);
         }
 
-        public static IProgress<T> CreateOnlyValueChanged<T>(Action<T> handler, IEqualityComparer<T> comparer = null)
-        {
+        public static IProgress<T> CreateOnlyValueChanged<T>(Action<T> handler, IEqualityComparer<T> comparer = null) {
             if (handler == null) return NullProgress<T>.Instance;
 #if UNITY_2018_3_OR_NEWER
             return new OnlyValueChangedProgress<T>(handler, comparer ?? UnityEqualityComparer.GetDefault<T>());
@@ -25,57 +21,45 @@ namespace Cysharp.Threading.Tasks
 #endif
         }
 
-        sealed class NullProgress<T> : IProgress<T>
-        {
+        sealed class NullProgress<T> : IProgress<T> {
             public static readonly IProgress<T> Instance = new NullProgress<T>();
 
-            NullProgress()
-            {
+            NullProgress() {
 
             }
 
-            public void Report(T value)
-            {
+            public void Report(T value) {
             }
         }
 
-        sealed class AnonymousProgress<T> : IProgress<T>
-        {
+        sealed class AnonymousProgress<T> : IProgress<T> {
             readonly Action<T> action;
 
-            public AnonymousProgress(Action<T> action)
-            {
+            public AnonymousProgress(Action<T> action) {
                 this.action = action;
             }
 
-            public void Report(T value)
-            {
+            public void Report(T value) {
                 action(value);
             }
         }
 
-        sealed class OnlyValueChangedProgress<T> : IProgress<T>
-        {
+        sealed class OnlyValueChangedProgress<T> : IProgress<T> {
             readonly Action<T> action;
             readonly IEqualityComparer<T> comparer;
             bool isFirstCall;
             T latestValue;
 
-            public OnlyValueChangedProgress(Action<T> action, IEqualityComparer<T> comparer)
-            {
+            public OnlyValueChangedProgress(Action<T> action, IEqualityComparer<T> comparer) {
                 this.action = action;
                 this.comparer = comparer;
                 this.isFirstCall = true;
             }
 
-            public void Report(T value)
-            {
-                if (isFirstCall)
-                {
+            public void Report(T value) {
+                if (isFirstCall) {
                     isFirstCall = false;
-                }
-                else if (comparer.Equals(value, latestValue))
-                {
+                } else if (comparer.Equals(value, latestValue)) {
                     return;
                 }
 

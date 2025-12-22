@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks
-{
-    public interface ITriggerHandler<T>
-    {
+namespace Cysharp.Threading.Tasks {
+    public interface ITriggerHandler<T> {
         void OnNext(T value);
         void OnError(Exception ex);
         void OnCompleted();
@@ -16,14 +14,12 @@ namespace Cysharp.Threading.Tasks
     }
 
     // be careful to use, itself is struct.
-    public struct TriggerEvent<T>
-    {
+    public struct TriggerEvent<T> {
         ITriggerHandler<T> head; // head.prev is last
         ITriggerHandler<T> iteratingHead;
         ITriggerHandler<T> iteratingNode;
 
-        void LogError(Exception ex)
-        {
+        void LogError(Exception ex) {
 #if UNITY_2018_3_OR_NEWER
             UnityEngine.Debug.LogException(ex);
 #else
@@ -31,24 +27,18 @@ namespace Cysharp.Threading.Tasks
 #endif
         }
 
-        public void SetResult(T value)
-        {
-            if (iteratingNode != null)
-            {
+        public void SetResult(T value) {
+            if (iteratingNode != null) {
                 throw new InvalidOperationException("Can not trigger itself in iterating.");
             }
 
             var h = head;
-            while (h != null)
-            {
+            while (h != null) {
                 iteratingNode = h;
 
-                try
-                {
+                try {
                     h.OnNext(value);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     LogError(ex);
                     Remove(h);
                 }
@@ -59,30 +49,23 @@ namespace Cysharp.Threading.Tasks
             }
 
             iteratingNode = null;
-            if (iteratingHead != null)
-            {
+            if (iteratingHead != null) {
                 Add(iteratingHead);
                 iteratingHead = null;
             }
         }
 
-        public void SetCanceled(CancellationToken cancellationToken)
-        {
-            if (iteratingNode != null)
-            {
+        public void SetCanceled(CancellationToken cancellationToken) {
+            if (iteratingNode != null) {
                 throw new InvalidOperationException("Can not trigger itself in iterating.");
             }
 
             var h = head;
-            while (h != null)
-            {
+            while (h != null) {
                 iteratingNode = h;
-                try
-                {
+                try {
                     h.OnCanceled(cancellationToken);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     LogError(ex);
                 }
 
@@ -93,30 +76,23 @@ namespace Cysharp.Threading.Tasks
             }
 
             iteratingNode = null;
-            if (iteratingHead != null)
-            {
+            if (iteratingHead != null) {
                 Add(iteratingHead);
                 iteratingHead = null;
             }
         }
 
-        public void SetCompleted()
-        {
-            if (iteratingNode != null)
-            {
+        public void SetCompleted() {
+            if (iteratingNode != null) {
                 throw new InvalidOperationException("Can not trigger itself in iterating.");
             }
 
             var h = head;
-            while (h != null)
-            {
+            while (h != null) {
                 iteratingNode = h;
-                try
-                {
+                try {
                     h.OnCompleted();
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     LogError(ex);
                 }
 
@@ -127,30 +103,23 @@ namespace Cysharp.Threading.Tasks
             }
 
             iteratingNode = null;
-            if (iteratingHead != null)
-            {
+            if (iteratingHead != null) {
                 Add(iteratingHead);
                 iteratingHead = null;
             }
         }
 
-        public void SetError(Exception exception)
-        {
-            if (iteratingNode != null)
-            {
+        public void SetError(Exception exception) {
+            if (iteratingNode != null) {
                 throw new InvalidOperationException("Can not trigger itself in iterating.");
             }
 
             var h = head;
-            while (h != null)
-            {
+            while (h != null) {
                 iteratingNode = h;
-                try
-                {
+                try {
                     h.OnError(exception);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     LogError(ex);
                 }
 
@@ -161,60 +130,47 @@ namespace Cysharp.Threading.Tasks
             }
 
             iteratingNode = null;
-            if (iteratingHead != null)
-            {
+            if (iteratingHead != null) {
                 Add(iteratingHead);
                 iteratingHead = null;
             }
         }
 
-        public void Add(ITriggerHandler<T> handler)
-        {
+        public void Add(ITriggerHandler<T> handler) {
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
             // zero node.
-            if (head == null)
-            {
+            if (head == null) {
                 head = handler;
                 return;
             }
 
-            if (iteratingNode != null)
-            {
-                if (iteratingHead == null)
-                {
+            if (iteratingNode != null) {
+                if (iteratingHead == null) {
                     iteratingHead = handler;
                     return;
                 }
 
                 var last = iteratingHead.Prev;
-                if (last == null)
-                {
+                if (last == null) {
                     // single node.
                     iteratingHead.Prev = handler;
                     iteratingHead.Next = handler;
                     handler.Prev = iteratingHead;
-                }
-                else
-                {
+                } else {
                     // multi node
                     iteratingHead.Prev = handler;
                     last.Next = handler;
                     handler.Prev = last;
                 }
-            }
-            else
-            {
+            } else {
                 var last = head.Prev;
-                if (last == null)
-                {
+                if (last == null) {
                     // single node.
                     head.Prev = handler;
                     head.Next = handler;
                     handler.Prev = head;
-                }
-                else
-                {
+                } else {
                     // multi node
                     head.Prev = handler;
                     last.Next = handler;
@@ -223,62 +179,46 @@ namespace Cysharp.Threading.Tasks
             }
         }
 
-        public void Remove(ITriggerHandler<T> handler)
-        {
+        public void Remove(ITriggerHandler<T> handler) {
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
             var prev = handler.Prev;
             var next = handler.Next;
 
-            if (next != null)
-            {
+            if (next != null) {
                 next.Prev = prev;
             }
 
-            if (handler == head)
-            {
+            if (handler == head) {
                 head = next;
             }
             // when handler is head, prev indicate last so don't use it.
-            else if (prev != null)
-            {
+            else if (prev != null) {
                 prev.Next = next;
             }
 
-            if (handler == iteratingNode)
-            {
+            if (handler == iteratingNode) {
                 iteratingNode = next;
             }
-            if (handler == iteratingHead)
-            {
+            if (handler == iteratingHead) {
                 iteratingHead = next;
             }
 
-            if (head != null)
-            {
-                if (head.Prev == handler)
-                {
-                    if (prev != head)
-                    {
+            if (head != null) {
+                if (head.Prev == handler) {
+                    if (prev != head) {
                         head.Prev = prev;
-                    }
-                    else
-                    {
+                    } else {
                         head.Prev = null;
                     }
                 }
             }
 
-            if (iteratingHead != null)
-            {
-                if (iteratingHead.Prev == handler)
-                {
-                    if (prev != iteratingHead.Prev)
-                    {
+            if (iteratingHead != null) {
+                if (iteratingHead.Prev == handler) {
+                    if (prev != iteratingHead.Prev) {
                         iteratingHead.Prev = prev;
-                    }
-                    else
-                    {
+                    } else {
                         iteratingHead.Prev = null;
                     }
                 }

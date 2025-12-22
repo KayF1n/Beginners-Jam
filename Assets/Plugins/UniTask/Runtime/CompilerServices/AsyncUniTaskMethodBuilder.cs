@@ -7,39 +7,29 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace Cysharp.Threading.Tasks.CompilerServices
-{
+namespace Cysharp.Threading.Tasks.CompilerServices {
     [StructLayout(LayoutKind.Auto)]
-    public struct AsyncUniTaskMethodBuilder
-    {
+    public struct AsyncUniTaskMethodBuilder {
         IStateMachineRunnerPromise runnerPromise;
         Exception ex;
 
         // 1. Static Create method.
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static AsyncUniTaskMethodBuilder Create()
-        {
+        public static AsyncUniTaskMethodBuilder Create() {
             return default;
         }
 
         // 2. TaskLike Task property.
-        public UniTask Task
-        {
+        public UniTask Task {
             [DebuggerHidden]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (runnerPromise != null)
-                {
+            get {
+                if (runnerPromise != null) {
                     return runnerPromise.Task;
-                }
-                else if (ex != null)
-                {
+                } else if (ex != null) {
                     return UniTask.FromException(ex);
-                }
-                else
-                {
+                } else {
                     return UniTask.CompletedTask;
                 }
             }
@@ -48,14 +38,10 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 3. SetException
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetException(Exception exception)
-        {
-            if (runnerPromise == null)
-            {
+        public void SetException(Exception exception) {
+            if (runnerPromise == null) {
                 ex = exception;
-            }
-            else
-            {
+            } else {
                 runnerPromise.SetException(exception);
             }
         }
@@ -63,10 +49,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 4. SetResult
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetResult()
-        {
-            if (runnerPromise != null)
-            {
+        public void SetResult() {
+            if (runnerPromise != null) {
                 runnerPromise.SetResult();
             }
         }
@@ -76,10 +60,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            if (runnerPromise == null)
-            {
+            where TStateMachine : IAsyncStateMachine {
+            if (runnerPromise == null) {
                 AsyncUniTask<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
             }
 
@@ -92,10 +74,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            if (runnerPromise == null)
-            {
+            where TStateMachine : IAsyncStateMachine {
+            if (runnerPromise == null) {
                 AsyncUniTask<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
             }
 
@@ -106,27 +86,22 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
-            where TStateMachine : IAsyncStateMachine
-        {
+            where TStateMachine : IAsyncStateMachine {
             stateMachine.MoveNext();
         }
 
         // 8. SetStateMachine
         [DebuggerHidden]
-        public void SetStateMachine(IAsyncStateMachine stateMachine)
-        {
+        public void SetStateMachine(IAsyncStateMachine stateMachine) {
             // don't use boxed stateMachine.
         }
 
 #if DEBUG || !UNITY_2018_3_OR_NEWER
         // Important for IDE debugger.
         object debuggingId;
-        private object ObjectIdForDebugger
-        {
-            get
-            {
-                if (debuggingId == null)
-                {
+        private object ObjectIdForDebugger {
+            get {
+                if (debuggingId == null) {
                     debuggingId = new object();
                 }
                 return debuggingId;
@@ -136,8 +111,7 @@ namespace Cysharp.Threading.Tasks.CompilerServices
     }
 
     [StructLayout(LayoutKind.Auto)]
-    public struct AsyncUniTaskMethodBuilder<T>
-    {
+    public struct AsyncUniTaskMethodBuilder<T> {
         IStateMachineRunnerPromise<T> runnerPromise;
         Exception ex;
         T result;
@@ -145,28 +119,20 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 1. Static Create method.
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static AsyncUniTaskMethodBuilder<T> Create()
-        {
+        public static AsyncUniTaskMethodBuilder<T> Create() {
             return default;
         }
 
         // 2. TaskLike Task property.
-        public UniTask<T> Task
-        {
+        public UniTask<T> Task {
             [DebuggerHidden]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (runnerPromise != null)
-                {
+            get {
+                if (runnerPromise != null) {
                     return runnerPromise.Task;
-                }
-                else if (ex != null)
-                {
+                } else if (ex != null) {
                     return UniTask.FromException<T>(ex);
-                }
-                else
-                {
+                } else {
                     return UniTask.FromResult(result);
                 }
             }
@@ -175,14 +141,10 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 3. SetException
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetException(Exception exception)
-        {
-            if (runnerPromise == null)
-            {
+        public void SetException(Exception exception) {
+            if (runnerPromise == null) {
                 ex = exception;
-            }
-            else
-            {
+            } else {
                 runnerPromise.SetException(exception);
             }
         }
@@ -190,14 +152,10 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 4. SetResult
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetResult(T result)
-        {
-            if (runnerPromise == null)
-            {
+        public void SetResult(T result) {
+            if (runnerPromise == null) {
                 this.result = result;
-            }
-            else
-            {
+            } else {
                 runnerPromise.SetResult(result);
             }
         }
@@ -207,10 +165,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            if (runnerPromise == null)
-            {
+            where TStateMachine : IAsyncStateMachine {
+            if (runnerPromise == null) {
                 AsyncUniTask<TStateMachine, T>.SetStateMachine(ref stateMachine, ref runnerPromise);
             }
 
@@ -223,10 +179,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            if (runnerPromise == null)
-            {
+            where TStateMachine : IAsyncStateMachine {
+            if (runnerPromise == null) {
                 AsyncUniTask<TStateMachine, T>.SetStateMachine(ref stateMachine, ref runnerPromise);
             }
 
@@ -237,27 +191,22 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
-            where TStateMachine : IAsyncStateMachine
-        {
+            where TStateMachine : IAsyncStateMachine {
             stateMachine.MoveNext();
         }
 
         // 8. SetStateMachine
         [DebuggerHidden]
-        public void SetStateMachine(IAsyncStateMachine stateMachine)
-        {
+        public void SetStateMachine(IAsyncStateMachine stateMachine) {
             // don't use boxed stateMachine.
         }
 
 #if DEBUG || !UNITY_2018_3_OR_NEWER
         // Important for IDE debugger.
         object debuggingId;
-        private object ObjectIdForDebugger
-        {
-            get
-            {
-                if (debuggingId == null)
-                {
+        private object ObjectIdForDebugger {
+            get {
+                if (debuggingId == null) {
                     debuggingId = new object();
                 }
                 return debuggingId;

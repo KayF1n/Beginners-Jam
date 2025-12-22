@@ -2,24 +2,19 @@
 
 using System;
 
-namespace Cysharp.Threading.Tasks
-{
-    public readonly struct AsyncUnit : IEquatable<AsyncUnit>
-    {
+namespace Cysharp.Threading.Tasks {
+    public readonly struct AsyncUnit : IEquatable<AsyncUnit> {
         public static readonly AsyncUnit Default = new AsyncUnit();
 
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return 0;
         }
 
-        public bool Equals(AsyncUnit other)
-        {
+        public bool Equals(AsyncUnit other) {
             return true;
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return "()";
         }
     }

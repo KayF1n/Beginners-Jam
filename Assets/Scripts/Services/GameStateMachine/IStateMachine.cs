@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public interface IStateMachine {
     void ChangeState<T>() where T : class, IState;

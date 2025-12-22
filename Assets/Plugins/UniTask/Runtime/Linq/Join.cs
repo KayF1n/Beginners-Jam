@@ -4,12 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IUniTaskAsyncEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IUniTaskAsyncEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector) {
             Error.ThrowArgumentNullException(outer, nameof(outer));
             Error.ThrowArgumentNullException(inner, nameof(inner));
             Error.ThrowArgumentNullException(outerKeySelector, nameof(outerKeySelector));
@@ -19,8 +16,7 @@ namespace Cysharp.Threading.Tasks.Linq
             return new Join<TOuter, TInner, TKey, TResult>(outer, inner, outerKeySelector, innerKeySelector, resultSelector, EqualityComparer<TKey>.Default);
         }
 
-        public static IUniTaskAsyncEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer)
-        {
+        public static IUniTaskAsyncEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer) {
             Error.ThrowArgumentNullException(outer, nameof(outer));
             Error.ThrowArgumentNullException(inner, nameof(inner));
             Error.ThrowArgumentNullException(outerKeySelector, nameof(outerKeySelector));
@@ -31,8 +27,7 @@ namespace Cysharp.Threading.Tasks.Linq
             return new Join<TOuter, TInner, TKey, TResult>(outer, inner, outerKeySelector, innerKeySelector, resultSelector, comparer);
         }
 
-        public static IUniTaskAsyncEnumerable<TResult> JoinAwait<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector)
-        {
+        public static IUniTaskAsyncEnumerable<TResult> JoinAwait<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector) {
             Error.ThrowArgumentNullException(outer, nameof(outer));
             Error.ThrowArgumentNullException(inner, nameof(inner));
             Error.ThrowArgumentNullException(outerKeySelector, nameof(outerKeySelector));
@@ -42,8 +37,7 @@ namespace Cysharp.Threading.Tasks.Linq
             return new JoinAwait<TOuter, TInner, TKey, TResult>(outer, inner, outerKeySelector, innerKeySelector, resultSelector, EqualityComparer<TKey>.Default);
         }
 
-        public static IUniTaskAsyncEnumerable<TResult> JoinAwait<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer)
-        {
+        public static IUniTaskAsyncEnumerable<TResult> JoinAwait<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer) {
             Error.ThrowArgumentNullException(outer, nameof(outer));
             Error.ThrowArgumentNullException(inner, nameof(inner));
             Error.ThrowArgumentNullException(outerKeySelector, nameof(outerKeySelector));
@@ -54,8 +48,7 @@ namespace Cysharp.Threading.Tasks.Linq
             return new JoinAwait<TOuter, TInner, TKey, TResult>(outer, inner, outerKeySelector, innerKeySelector, resultSelector, comparer);
         }
 
-        public static IUniTaskAsyncEnumerable<TResult> JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector)
-        {
+        public static IUniTaskAsyncEnumerable<TResult> JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector) {
             Error.ThrowArgumentNullException(outer, nameof(outer));
             Error.ThrowArgumentNullException(inner, nameof(inner));
             Error.ThrowArgumentNullException(outerKeySelector, nameof(outerKeySelector));
@@ -65,8 +58,7 @@ namespace Cysharp.Threading.Tasks.Linq
             return new JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult>(outer, inner, outerKeySelector, innerKeySelector, resultSelector, EqualityComparer<TKey>.Default);
         }
 
-        public static IUniTaskAsyncEnumerable<TResult> JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer)
-        {
+        public static IUniTaskAsyncEnumerable<TResult> JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult>(this IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer) {
             Error.ThrowArgumentNullException(outer, nameof(outer));
             Error.ThrowArgumentNullException(inner, nameof(inner));
             Error.ThrowArgumentNullException(outerKeySelector, nameof(outerKeySelector));
@@ -78,8 +70,7 @@ namespace Cysharp.Threading.Tasks.Linq
         }
     }
 
-    internal sealed class Join<TOuter, TInner, TKey, TResult> : IUniTaskAsyncEnumerable<TResult>
-    {
+    internal sealed class Join<TOuter, TInner, TKey, TResult> : IUniTaskAsyncEnumerable<TResult> {
         readonly IUniTaskAsyncEnumerable<TOuter> outer;
         readonly IUniTaskAsyncEnumerable<TInner> inner;
         readonly Func<TOuter, TKey> outerKeySelector;
@@ -87,8 +78,7 @@ namespace Cysharp.Threading.Tasks.Linq
         readonly Func<TOuter, TInner, TResult> resultSelector;
         readonly IEqualityComparer<TKey> comparer;
 
-        public Join(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer)
-        {
+        public Join(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer) {
             this.outer = outer;
             this.inner = inner;
             this.outerKeySelector = outerKeySelector;
@@ -97,13 +87,11 @@ namespace Cysharp.Threading.Tasks.Linq
             this.comparer = comparer;
         }
 
-        public IUniTaskAsyncEnumerator<TResult> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<TResult> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _Join(outer, inner, outerKeySelector, innerKeySelector, resultSelector, comparer, cancellationToken);
         }
 
-        sealed class _Join : MoveNextSource, IUniTaskAsyncEnumerator<TResult>
-        {
+        sealed class _Join : MoveNextSource, IUniTaskAsyncEnumerator<TResult> {
             static readonly Action<object> MoveNextCoreDelegate = MoveNextCore;
 
             readonly IUniTaskAsyncEnumerable<TOuter> outer;
@@ -122,8 +110,7 @@ namespace Cysharp.Threading.Tasks.Linq
 
             bool continueNext;
 
-            public _Join(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken)
-            {
+            public _Join(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken) {
                 this.outer = outer;
                 this.inner = inner;
                 this.outerKeySelector = outerKeySelector;
@@ -136,127 +123,94 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public TResult Current { get; private set; }
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
                 completionSource.Reset();
 
-                if (lookup == null)
-                {
+                if (lookup == null) {
                     CreateInnerHashSet().Forget();
-                }
-                else
-                {
+                } else {
                     SourceMoveNext();
                 }
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            async UniTaskVoid CreateInnerHashSet()
-            {
-                try
-                {
+            async UniTaskVoid CreateInnerHashSet() {
+                try {
                     lookup = await inner.ToLookupAsync(innerKeySelector, comparer, cancellationToken);
                     enumerator = outer.GetAsyncEnumerator(cancellationToken);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                     return;
                 }
                 SourceMoveNext();
             }
 
-            void SourceMoveNext()
-            {
-                try
-                {
-                    LOOP:
-                    if (valueEnumerator != null)
-                    {
-                        if (valueEnumerator.MoveNext())
-                        {
+            void SourceMoveNext() {
+                try {
+                LOOP:
+                    if (valueEnumerator != null) {
+                        if (valueEnumerator.MoveNext()) {
                             Current = resultSelector(currentOuterValue, valueEnumerator.Current);
                             goto TRY_SET_RESULT_TRUE;
-                        }
-                        else
-                        {
+                        } else {
                             valueEnumerator.Dispose();
                             valueEnumerator = null;
                         }
                     }
 
                     awaiter = enumerator.MoveNextAsync().GetAwaiter();
-                    if (awaiter.IsCompleted)
-                    {
+                    if (awaiter.IsCompleted) {
                         continueNext = true;
                         MoveNextCore(this);
-                        if (continueNext)
-                        {
+                        if (continueNext) {
                             continueNext = false;
                             goto LOOP; // avoid recursive
                         }
-                    }
-                    else
-                    {
+                    } else {
                         awaiter.SourceOnCompleted(MoveNextCoreDelegate, this);
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                 }
 
                 return;
 
-                TRY_SET_RESULT_TRUE:
+            TRY_SET_RESULT_TRUE:
                 completionSource.TrySetResult(true);
             }
 
 
-            static void MoveNextCore(object state)
-            {
+            static void MoveNextCore(object state) {
                 var self = (_Join)state;
 
-                if (self.TryGetResult(self.awaiter, out var result))
-                {
-                    if (result)
-                    {
+                if (self.TryGetResult(self.awaiter, out var result)) {
+                    if (result) {
                         self.currentOuterValue = self.enumerator.Current;
                         var key = self.outerKeySelector(self.currentOuterValue);
                         self.valueEnumerator = self.lookup[key].GetEnumerator();
 
-                        if (self.continueNext)
-                        {
+                        if (self.continueNext) {
                             return;
-                        }
-                        else
-                        {
+                        } else {
                             self.SourceMoveNext();
                         }
-                    }
-                    else
-                    {
+                    } else {
                         self.continueNext = false;
                         self.completionSource.TrySetResult(false);
                     }
-                }
-                else
-                {
+                } else {
                     self.continueNext = false;
                 }
             }
 
-            public UniTask DisposeAsync()
-            {
+            public UniTask DisposeAsync() {
                 TaskTracker.RemoveTracking(this);
-                if (valueEnumerator != null)
-                {
+                if (valueEnumerator != null) {
                     valueEnumerator.Dispose();
                 }
 
-                if (enumerator != null)
-                {
+                if (enumerator != null) {
                     return enumerator.DisposeAsync();
                 }
 
@@ -265,8 +219,7 @@ namespace Cysharp.Threading.Tasks.Linq
         }
     }
 
-    internal sealed class JoinAwait<TOuter, TInner, TKey, TResult> : IUniTaskAsyncEnumerable<TResult>
-    {
+    internal sealed class JoinAwait<TOuter, TInner, TKey, TResult> : IUniTaskAsyncEnumerable<TResult> {
         readonly IUniTaskAsyncEnumerable<TOuter> outer;
         readonly IUniTaskAsyncEnumerable<TInner> inner;
         readonly Func<TOuter, UniTask<TKey>> outerKeySelector;
@@ -274,8 +227,7 @@ namespace Cysharp.Threading.Tasks.Linq
         readonly Func<TOuter, TInner, UniTask<TResult>> resultSelector;
         readonly IEqualityComparer<TKey> comparer;
 
-        public JoinAwait(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer)
-        {
+        public JoinAwait(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer) {
             this.outer = outer;
             this.inner = inner;
             this.outerKeySelector = outerKeySelector;
@@ -284,13 +236,11 @@ namespace Cysharp.Threading.Tasks.Linq
             this.comparer = comparer;
         }
 
-        public IUniTaskAsyncEnumerator<TResult> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<TResult> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _JoinAwait(outer, inner, outerKeySelector, innerKeySelector, resultSelector, comparer, cancellationToken);
         }
 
-        sealed class _JoinAwait : MoveNextSource, IUniTaskAsyncEnumerator<TResult>
-        {
+        sealed class _JoinAwait : MoveNextSource, IUniTaskAsyncEnumerator<TResult> {
             static readonly Action<object> MoveNextCoreDelegate = MoveNextCore;
             static readonly Action<object> OuterSelectCoreDelegate = OuterSelectCore;
             static readonly Action<object> ResultSelectCoreDelegate = ResultSelectCore;
@@ -314,8 +264,7 @@ namespace Cysharp.Threading.Tasks.Linq
 
             bool continueNext;
 
-            public _JoinAwait(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken)
-            {
+            public _JoinAwait(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, UniTask<TKey>> outerKeySelector, Func<TInner, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken) {
                 this.outer = outer;
                 this.inner = inner;
                 this.outerKeySelector = outerKeySelector;
@@ -328,165 +277,120 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public TResult Current { get; private set; }
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
                 completionSource.Reset();
 
-                if (lookup == null)
-                {
+                if (lookup == null) {
                     CreateInnerHashSet().Forget();
-                }
-                else
-                {
+                } else {
                     SourceMoveNext();
                 }
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            async UniTaskVoid CreateInnerHashSet()
-            {
-                try
-                {
+            async UniTaskVoid CreateInnerHashSet() {
+                try {
                     lookup = await inner.ToLookupAwaitAsync(innerKeySelector, comparer, cancellationToken);
                     enumerator = outer.GetAsyncEnumerator(cancellationToken);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                     return;
                 }
                 SourceMoveNext();
             }
 
-            void SourceMoveNext()
-            {
-                try
-                {
-                    LOOP:
-                    if (valueEnumerator != null)
-                    {
-                        if (valueEnumerator.MoveNext())
-                        {
+            void SourceMoveNext() {
+                try {
+                LOOP:
+                    if (valueEnumerator != null) {
+                        if (valueEnumerator.MoveNext()) {
                             resultAwaiter = resultSelector(currentOuterValue, valueEnumerator.Current).GetAwaiter();
-                            if (resultAwaiter.IsCompleted)
-                            {
+                            if (resultAwaiter.IsCompleted) {
                                 ResultSelectCore(this);
-                            }
-                            else
-                            {
+                            } else {
                                 resultAwaiter.SourceOnCompleted(ResultSelectCoreDelegate, this);
                             }
                             return;
-                        }
-                        else
-                        {
+                        } else {
                             valueEnumerator.Dispose();
                             valueEnumerator = null;
                         }
                     }
 
                     awaiter = enumerator.MoveNextAsync().GetAwaiter();
-                    if (awaiter.IsCompleted)
-                    {
+                    if (awaiter.IsCompleted) {
                         continueNext = true;
                         MoveNextCore(this);
-                        if (continueNext)
-                        {
+                        if (continueNext) {
                             continueNext = false;
                             goto LOOP; // avoid recursive
                         }
-                    }
-                    else
-                    {
+                    } else {
                         awaiter.SourceOnCompleted(MoveNextCoreDelegate, this);
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                 }
             }
 
 
-            static void MoveNextCore(object state)
-            {
+            static void MoveNextCore(object state) {
                 var self = (_JoinAwait)state;
 
-                if (self.TryGetResult(self.awaiter, out var result))
-                {
-                    if (result)
-                    {
+                if (self.TryGetResult(self.awaiter, out var result)) {
+                    if (result) {
                         self.currentOuterValue = self.enumerator.Current;
 
                         self.outerKeyAwaiter = self.outerKeySelector(self.currentOuterValue).GetAwaiter();
 
-                        if (self.outerKeyAwaiter.IsCompleted)
-                        {
+                        if (self.outerKeyAwaiter.IsCompleted) {
                             OuterSelectCore(self);
-                        }
-                        else
-                        {
+                        } else {
                             self.continueNext = false;
                             self.outerKeyAwaiter.SourceOnCompleted(OuterSelectCoreDelegate, self);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         self.continueNext = false;
                         self.completionSource.TrySetResult(false);
                     }
-                }
-                else
-                {
+                } else {
                     self.continueNext = false;
                 }
             }
 
-            static void OuterSelectCore(object state)
-            {
+            static void OuterSelectCore(object state) {
                 var self = (_JoinAwait)state;
 
-                if (self.TryGetResult(self.outerKeyAwaiter, out var key))
-                {
+                if (self.TryGetResult(self.outerKeyAwaiter, out var key)) {
                     self.valueEnumerator = self.lookup[key].GetEnumerator();
 
-                    if (self.continueNext)
-                    {
+                    if (self.continueNext) {
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         self.SourceMoveNext();
                     }
-                }
-                else
-                {
+                } else {
                     self.continueNext = false;
                 }
             }
 
-            static void ResultSelectCore(object state)
-            {
+            static void ResultSelectCore(object state) {
                 var self = (_JoinAwait)state;
 
-                if (self.TryGetResult(self.resultAwaiter, out var result))
-                {
+                if (self.TryGetResult(self.resultAwaiter, out var result)) {
                     self.Current = result;
                     self.completionSource.TrySetResult(true);
                 }
             }
 
-            public UniTask DisposeAsync()
-            {
+            public UniTask DisposeAsync() {
                 TaskTracker.RemoveTracking(this);
-                if (valueEnumerator != null)
-                {
+                if (valueEnumerator != null) {
                     valueEnumerator.Dispose();
                 }
 
-                if (enumerator != null)
-                {
+                if (enumerator != null) {
                     return enumerator.DisposeAsync();
                 }
 
@@ -495,8 +399,7 @@ namespace Cysharp.Threading.Tasks.Linq
         }
     }
 
-    internal sealed class JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult> : IUniTaskAsyncEnumerable<TResult>
-    {
+    internal sealed class JoinAwaitWithCancellation<TOuter, TInner, TKey, TResult> : IUniTaskAsyncEnumerable<TResult> {
         readonly IUniTaskAsyncEnumerable<TOuter> outer;
         readonly IUniTaskAsyncEnumerable<TInner> inner;
         readonly Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector;
@@ -504,8 +407,7 @@ namespace Cysharp.Threading.Tasks.Linq
         readonly Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector;
         readonly IEqualityComparer<TKey> comparer;
 
-        public JoinAwaitWithCancellation(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer)
-        {
+        public JoinAwaitWithCancellation(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer) {
             this.outer = outer;
             this.inner = inner;
             this.outerKeySelector = outerKeySelector;
@@ -514,13 +416,11 @@ namespace Cysharp.Threading.Tasks.Linq
             this.comparer = comparer;
         }
 
-        public IUniTaskAsyncEnumerator<TResult> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<TResult> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _JoinAwaitWithCancellation(outer, inner, outerKeySelector, innerKeySelector, resultSelector, comparer, cancellationToken);
         }
 
-        sealed class _JoinAwaitWithCancellation : MoveNextSource, IUniTaskAsyncEnumerator<TResult>
-        {
+        sealed class _JoinAwaitWithCancellation : MoveNextSource, IUniTaskAsyncEnumerator<TResult> {
             static readonly Action<object> MoveNextCoreDelegate = MoveNextCore;
             static readonly Action<object> OuterSelectCoreDelegate = OuterSelectCore;
             static readonly Action<object> ResultSelectCoreDelegate = ResultSelectCore;
@@ -544,8 +444,7 @@ namespace Cysharp.Threading.Tasks.Linq
 
             bool continueNext;
 
-            public _JoinAwaitWithCancellation(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken)
-            {
+            public _JoinAwaitWithCancellation(IUniTaskAsyncEnumerable<TOuter> outer, IUniTaskAsyncEnumerable<TInner> inner, Func<TOuter, CancellationToken, UniTask<TKey>> outerKeySelector, Func<TInner, CancellationToken, UniTask<TKey>> innerKeySelector, Func<TOuter, TInner, CancellationToken, UniTask<TResult>> resultSelector, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken) {
                 this.outer = outer;
                 this.inner = inner;
                 this.outerKeySelector = outerKeySelector;
@@ -558,165 +457,120 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public TResult Current { get; private set; }
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
                 completionSource.Reset();
 
-                if (lookup == null)
-                {
+                if (lookup == null) {
                     CreateInnerHashSet().Forget();
-                }
-                else
-                {
+                } else {
                     SourceMoveNext();
                 }
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            async UniTaskVoid CreateInnerHashSet()
-            {
-                try
-                {
+            async UniTaskVoid CreateInnerHashSet() {
+                try {
                     lookup = await inner.ToLookupAwaitWithCancellationAsync(innerKeySelector, comparer, cancellationToken: cancellationToken);
                     enumerator = outer.GetAsyncEnumerator(cancellationToken);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                     return;
                 }
                 SourceMoveNext();
             }
 
-            void SourceMoveNext()
-            {
-                try
-                {
-                    LOOP:
-                    if (valueEnumerator != null)
-                    {
-                        if (valueEnumerator.MoveNext())
-                        {
+            void SourceMoveNext() {
+                try {
+                LOOP:
+                    if (valueEnumerator != null) {
+                        if (valueEnumerator.MoveNext()) {
                             resultAwaiter = resultSelector(currentOuterValue, valueEnumerator.Current, cancellationToken).GetAwaiter();
-                            if (resultAwaiter.IsCompleted)
-                            {
+                            if (resultAwaiter.IsCompleted) {
                                 ResultSelectCore(this);
-                            }
-                            else
-                            {
+                            } else {
                                 resultAwaiter.SourceOnCompleted(ResultSelectCoreDelegate, this);
                             }
                             return;
-                        }
-                        else
-                        {
+                        } else {
                             valueEnumerator.Dispose();
                             valueEnumerator = null;
                         }
                     }
 
                     awaiter = enumerator.MoveNextAsync().GetAwaiter();
-                    if (awaiter.IsCompleted)
-                    {
+                    if (awaiter.IsCompleted) {
                         continueNext = true;
                         MoveNextCore(this);
-                        if (continueNext)
-                        {
+                        if (continueNext) {
                             continueNext = false;
                             goto LOOP; // avoid recursive
                         }
-                    }
-                    else
-                    {
+                    } else {
                         awaiter.SourceOnCompleted(MoveNextCoreDelegate, this);
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                 }
             }
 
 
-            static void MoveNextCore(object state)
-            {
+            static void MoveNextCore(object state) {
                 var self = (_JoinAwaitWithCancellation)state;
 
-                if (self.TryGetResult(self.awaiter, out var result))
-                {
-                    if (result)
-                    {
+                if (self.TryGetResult(self.awaiter, out var result)) {
+                    if (result) {
                         self.currentOuterValue = self.enumerator.Current;
 
                         self.outerKeyAwaiter = self.outerKeySelector(self.currentOuterValue, self.cancellationToken).GetAwaiter();
 
-                        if (self.outerKeyAwaiter.IsCompleted)
-                        {
+                        if (self.outerKeyAwaiter.IsCompleted) {
                             OuterSelectCore(self);
-                        }
-                        else
-                        {
+                        } else {
                             self.continueNext = false;
                             self.outerKeyAwaiter.SourceOnCompleted(OuterSelectCoreDelegate, self);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         self.continueNext = false;
                         self.completionSource.TrySetResult(false);
                     }
-                }
-                else
-                {
+                } else {
                     self.continueNext = false;
                 }
             }
 
-            static void OuterSelectCore(object state)
-            {
+            static void OuterSelectCore(object state) {
                 var self = (_JoinAwaitWithCancellation)state;
 
-                if (self.TryGetResult(self.outerKeyAwaiter, out var key))
-                {
+                if (self.TryGetResult(self.outerKeyAwaiter, out var key)) {
                     self.valueEnumerator = self.lookup[key].GetEnumerator();
 
-                    if (self.continueNext)
-                    {
+                    if (self.continueNext) {
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         self.SourceMoveNext();
                     }
-                }
-                else
-                {
+                } else {
                     self.continueNext = false;
                 }
             }
 
-            static void ResultSelectCore(object state)
-            {
+            static void ResultSelectCore(object state) {
                 var self = (_JoinAwaitWithCancellation)state;
 
-                if (self.TryGetResult(self.resultAwaiter, out var result))
-                {
+                if (self.TryGetResult(self.resultAwaiter, out var result)) {
                     self.Current = result;
                     self.completionSource.TrySetResult(true);
                 }
             }
 
-            public UniTask DisposeAsync()
-            {
+            public UniTask DisposeAsync() {
                 TaskTracker.RemoveTracking(this);
-                if (valueEnumerator != null)
-                {
+                if (valueEnumerator != null) {
                     valueEnumerator.Dispose();
                 }
 
-                if (enumerator != null)
-                {
+                if (enumerator != null) {
                     return enumerator.DisposeAsync();
                 }
 

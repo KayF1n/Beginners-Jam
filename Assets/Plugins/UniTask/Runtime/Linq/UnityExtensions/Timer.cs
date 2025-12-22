@@ -2,69 +2,55 @@
 using System.Threading;
 using UnityEngine;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IUniTaskAsyncEnumerable<AsyncUnit> Timer(TimeSpan dueTime, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool ignoreTimeScale = false, bool cancelImmediately = false)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IUniTaskAsyncEnumerable<AsyncUnit> Timer(TimeSpan dueTime, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool ignoreTimeScale = false, bool cancelImmediately = false) {
             return new Timer(dueTime, null, updateTiming, ignoreTimeScale, cancelImmediately);
         }
 
-        public static IUniTaskAsyncEnumerable<AsyncUnit> Timer(TimeSpan dueTime, TimeSpan period, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool ignoreTimeScale = false, bool cancelImmediately = false)
-        {
+        public static IUniTaskAsyncEnumerable<AsyncUnit> Timer(TimeSpan dueTime, TimeSpan period, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool ignoreTimeScale = false, bool cancelImmediately = false) {
             return new Timer(dueTime, period, updateTiming, ignoreTimeScale, cancelImmediately);
         }
 
-        public static IUniTaskAsyncEnumerable<AsyncUnit> Interval(TimeSpan period, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool ignoreTimeScale = false, bool cancelImmediately = false)
-        {
+        public static IUniTaskAsyncEnumerable<AsyncUnit> Interval(TimeSpan period, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool ignoreTimeScale = false, bool cancelImmediately = false) {
             return new Timer(period, period, updateTiming, ignoreTimeScale, cancelImmediately);
         }
 
-        public static IUniTaskAsyncEnumerable<AsyncUnit> TimerFrame(int dueTimeFrameCount, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool cancelImmediately = false)
-        {
-            if (dueTimeFrameCount < 0)
-            {
+        public static IUniTaskAsyncEnumerable<AsyncUnit> TimerFrame(int dueTimeFrameCount, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool cancelImmediately = false) {
+            if (dueTimeFrameCount < 0) {
                 throw new ArgumentOutOfRangeException("Delay does not allow minus delayFrameCount. dueTimeFrameCount:" + dueTimeFrameCount);
             }
 
             return new TimerFrame(dueTimeFrameCount, null, updateTiming, cancelImmediately);
         }
 
-        public static IUniTaskAsyncEnumerable<AsyncUnit> TimerFrame(int dueTimeFrameCount, int periodFrameCount, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool cancelImmediately = false)
-        {
-            if (dueTimeFrameCount < 0)
-            {
+        public static IUniTaskAsyncEnumerable<AsyncUnit> TimerFrame(int dueTimeFrameCount, int periodFrameCount, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool cancelImmediately = false) {
+            if (dueTimeFrameCount < 0) {
                 throw new ArgumentOutOfRangeException("Delay does not allow minus delayFrameCount. dueTimeFrameCount:" + dueTimeFrameCount);
             }
-            if (periodFrameCount < 0)
-            {
+            if (periodFrameCount < 0) {
                 throw new ArgumentOutOfRangeException("Delay does not allow minus periodFrameCount. periodFrameCount:" + dueTimeFrameCount);
             }
 
             return new TimerFrame(dueTimeFrameCount, periodFrameCount, updateTiming, cancelImmediately);
         }
 
-        public static IUniTaskAsyncEnumerable<AsyncUnit> IntervalFrame(int intervalFrameCount, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool cancelImmediately = false)
-        {
-            if (intervalFrameCount < 0)
-            {
+        public static IUniTaskAsyncEnumerable<AsyncUnit> IntervalFrame(int intervalFrameCount, PlayerLoopTiming updateTiming = PlayerLoopTiming.Update, bool cancelImmediately = false) {
+            if (intervalFrameCount < 0) {
                 throw new ArgumentOutOfRangeException("Delay does not allow minus intervalFrameCount. intervalFrameCount:" + intervalFrameCount);
             }
             return new TimerFrame(intervalFrameCount, intervalFrameCount, updateTiming, cancelImmediately);
         }
     }
 
-    internal class Timer : IUniTaskAsyncEnumerable<AsyncUnit>
-    {
+    internal class Timer : IUniTaskAsyncEnumerable<AsyncUnit> {
         readonly PlayerLoopTiming updateTiming;
         readonly TimeSpan dueTime;
         readonly TimeSpan? period;
         readonly bool ignoreTimeScale;
         readonly bool cancelImmediately;
 
-        public Timer(TimeSpan dueTime, TimeSpan? period, PlayerLoopTiming updateTiming, bool ignoreTimeScale, bool cancelImmediately)
-        {
+        public Timer(TimeSpan dueTime, TimeSpan? period, PlayerLoopTiming updateTiming, bool ignoreTimeScale, bool cancelImmediately) {
             this.updateTiming = updateTiming;
             this.dueTime = dueTime;
             this.period = period;
@@ -72,13 +58,11 @@ namespace Cysharp.Threading.Tasks.Linq
             this.cancelImmediately = cancelImmediately;
         }
 
-        public IUniTaskAsyncEnumerator<AsyncUnit> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<AsyncUnit> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _Timer(dueTime, period, updateTiming, ignoreTimeScale, cancellationToken, cancelImmediately);
         }
 
-        class _Timer : MoveNextSource, IUniTaskAsyncEnumerator<AsyncUnit>, IPlayerLoopItem
-        {
+        class _Timer : MoveNextSource, IUniTaskAsyncEnumerator<AsyncUnit>, IPlayerLoopItem {
             readonly float dueTime;
             readonly float? period;
             readonly PlayerLoopTiming updateTiming;
@@ -92,14 +76,12 @@ namespace Cysharp.Threading.Tasks.Linq
             bool completed;
             bool disposed;
 
-            public _Timer(TimeSpan dueTime, TimeSpan? period, PlayerLoopTiming updateTiming, bool ignoreTimeScale, CancellationToken cancellationToken, bool cancelImmediately)
-            {
+            public _Timer(TimeSpan dueTime, TimeSpan? period, PlayerLoopTiming updateTiming, bool ignoreTimeScale, CancellationToken cancellationToken, bool cancelImmediately) {
                 this.dueTime = (float)dueTime.TotalSeconds;
                 this.period = (period == null) ? null : (float?)period.Value.TotalSeconds;
 
                 if (this.dueTime <= 0) this.dueTime = 0;
-                if (this.period != null)
-                {
+                if (this.period != null) {
                     if (this.period <= 0) this.period = 1;
                 }
 
@@ -108,24 +90,21 @@ namespace Cysharp.Threading.Tasks.Linq
                 this.updateTiming = updateTiming;
                 this.ignoreTimeScale = ignoreTimeScale;
                 this.cancellationToken = cancellationToken;
-                
-                if (cancelImmediately && cancellationToken.CanBeCanceled)
-                {
-                    cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state =>
-                    {
+
+                if (cancelImmediately && cancellationToken.CanBeCanceled) {
+                    cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state => {
                         var source = (_Timer)state;
                         source.completionSource.TrySetCanceled(source.cancellationToken);
                     }, this);
                 }
-                
+
                 TaskTracker.TrackActiveTask(this, 2);
                 PlayerLoopHelper.AddAction(updateTiming, this);
             }
 
             public AsyncUnit Current => default;
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 // return false instead of throw
                 if (disposed || completed) return CompletedTasks.False;
 
@@ -133,17 +112,14 @@ namespace Cysharp.Threading.Tasks.Linq
                 this.elapsed = 0;
 
                 completionSource.Reset();
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     completionSource.TrySetCanceled(cancellationToken);
                 }
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            public UniTask DisposeAsync()
-            {
-                if (!disposed)
-                {
+            public UniTask DisposeAsync() {
+                if (!disposed) {
                     cancellationTokenRegistration.Dispose();
                     disposed = true;
                     TaskTracker.RemoveTracking(this);
@@ -151,42 +127,32 @@ namespace Cysharp.Threading.Tasks.Linq
                 return default;
             }
 
-            public bool MoveNext()
-            {
-                if (disposed)
-                {
+            public bool MoveNext() {
+                if (disposed) {
                     completionSource.TrySetResult(false);
                     return false;
                 }
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     completionSource.TrySetCanceled(cancellationToken);
                     return false;
-                }                
+                }
 
-                if (dueTimePhase)
-                {
-                    if (elapsed == 0)
-                    {
+                if (dueTimePhase) {
+                    if (elapsed == 0) {
                         // skip in initial frame.
-                        if (initialFrame == Time.frameCount)
-                        {
+                        if (initialFrame == Time.frameCount) {
                             return true;
                         }
                     }
 
                     elapsed += (ignoreTimeScale) ? UnityEngine.Time.unscaledDeltaTime : UnityEngine.Time.deltaTime;
 
-                    if (elapsed >= dueTime)
-                    {
+                    if (elapsed >= dueTime) {
                         dueTimePhase = false;
                         completionSource.TrySetResult(true);
                     }
-                }
-                else
-                {
-                    if (period == null)
-                    {
+                } else {
+                    if (period == null) {
                         completed = true;
                         completionSource.TrySetResult(false);
                         return false;
@@ -194,8 +160,7 @@ namespace Cysharp.Threading.Tasks.Linq
 
                     elapsed += (ignoreTimeScale) ? UnityEngine.Time.unscaledDeltaTime : UnityEngine.Time.deltaTime;
 
-                    if (elapsed >= period)
-                    {
+                    if (elapsed >= period) {
                         completionSource.TrySetResult(true);
                     }
                 }
@@ -205,28 +170,24 @@ namespace Cysharp.Threading.Tasks.Linq
         }
     }
 
-    internal class TimerFrame : IUniTaskAsyncEnumerable<AsyncUnit>
-    {
+    internal class TimerFrame : IUniTaskAsyncEnumerable<AsyncUnit> {
         readonly PlayerLoopTiming updateTiming;
         readonly int dueTimeFrameCount;
         readonly int? periodFrameCount;
         readonly bool cancelImmediately;
 
-        public TimerFrame(int dueTimeFrameCount, int? periodFrameCount, PlayerLoopTiming updateTiming, bool cancelImmediately)
-        {
+        public TimerFrame(int dueTimeFrameCount, int? periodFrameCount, PlayerLoopTiming updateTiming, bool cancelImmediately) {
             this.updateTiming = updateTiming;
             this.dueTimeFrameCount = dueTimeFrameCount;
             this.periodFrameCount = periodFrameCount;
             this.cancelImmediately = cancelImmediately;
         }
 
-        public IUniTaskAsyncEnumerator<AsyncUnit> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<AsyncUnit> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _TimerFrame(dueTimeFrameCount, periodFrameCount, updateTiming, cancellationToken, cancelImmediately);
         }
 
-        class _TimerFrame : MoveNextSource, IUniTaskAsyncEnumerator<AsyncUnit>, IPlayerLoopItem
-        {
+        class _TimerFrame : MoveNextSource, IUniTaskAsyncEnumerator<AsyncUnit>, IPlayerLoopItem {
             readonly int dueTimeFrameCount;
             readonly int? periodFrameCount;
             readonly CancellationToken cancellationToken;
@@ -238,11 +199,9 @@ namespace Cysharp.Threading.Tasks.Linq
             bool completed;
             bool disposed;
 
-            public _TimerFrame(int dueTimeFrameCount, int? periodFrameCount, PlayerLoopTiming updateTiming, CancellationToken cancellationToken, bool cancelImmediately)
-            {
+            public _TimerFrame(int dueTimeFrameCount, int? periodFrameCount, PlayerLoopTiming updateTiming, CancellationToken cancellationToken, bool cancelImmediately) {
                 if (dueTimeFrameCount <= 0) dueTimeFrameCount = 0;
-                if (periodFrameCount != null)
-                {
+                if (periodFrameCount != null) {
                     if (periodFrameCount <= 0) periodFrameCount = 1;
                 }
 
@@ -251,11 +210,9 @@ namespace Cysharp.Threading.Tasks.Linq
                 this.dueTimeFrameCount = dueTimeFrameCount;
                 this.periodFrameCount = periodFrameCount;
                 this.cancellationToken = cancellationToken;
-                
-                if (cancelImmediately && cancellationToken.CanBeCanceled)
-                {
-                    cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state =>
-                    {
+
+                if (cancelImmediately && cancellationToken.CanBeCanceled) {
+                    cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state => {
                         var source = (_TimerFrame)state;
                         source.completionSource.TrySetCanceled(source.cancellationToken);
                     }, this);
@@ -267,12 +224,10 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public AsyncUnit Current => default;
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 if (disposed || completed) return CompletedTasks.False;
 
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     completionSource.TrySetCanceled(cancellationToken);
                 }
 
@@ -282,10 +237,8 @@ namespace Cysharp.Threading.Tasks.Linq
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            public UniTask DisposeAsync()
-            {
-                if (!disposed)
-                {
+            public UniTask DisposeAsync() {
+                if (!disposed) {
                     cancellationTokenRegistration.Dispose();
                     disposed = true;
                     TaskTracker.RemoveTracking(this);
@@ -293,57 +246,43 @@ namespace Cysharp.Threading.Tasks.Linq
                 return default;
             }
 
-            public bool MoveNext()
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
+            public bool MoveNext() {
+                if (cancellationToken.IsCancellationRequested) {
                     completionSource.TrySetCanceled(cancellationToken);
                     return false;
                 }
-                if (disposed)
-                {
+                if (disposed) {
                     completionSource.TrySetResult(false);
                     return false;
                 }
 
-                if (dueTimePhase)
-                {
-                    if (currentFrame == 0)
-                    {
-                        if (dueTimeFrameCount == 0)
-                        {
+                if (dueTimePhase) {
+                    if (currentFrame == 0) {
+                        if (dueTimeFrameCount == 0) {
                             dueTimePhase = false;
                             completionSource.TrySetResult(true);
                             return true;
                         }
 
                         // skip in initial frame.
-                        if (initialFrame == Time.frameCount)
-                        {
+                        if (initialFrame == Time.frameCount) {
                             return true;
                         }
                     }
 
-                    if (++currentFrame >= dueTimeFrameCount)
-                    {
+                    if (++currentFrame >= dueTimeFrameCount) {
                         dueTimePhase = false;
                         completionSource.TrySetResult(true);
+                    } else {
                     }
-                    else
-                    {
-                    }
-                }
-                else
-                {
-                    if (periodFrameCount == null)
-                    {
+                } else {
+                    if (periodFrameCount == null) {
                         completed = true;
                         completionSource.TrySetResult(false);
                         return false;
                     }
 
-                    if (++currentFrame >= periodFrameCount)
-                    {
+                    if (++currentFrame >= periodFrameCount) {
                         completionSource.TrySetResult(true);
                     }
                 }

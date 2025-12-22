@@ -10,25 +10,20 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-namespace Cysharp.Threading.Tasks
-{
-    public static class AsyncInstantiateOperationExtensions
-    {
+namespace Cysharp.Threading.Tasks {
+    public static class AsyncInstantiateOperationExtensions {
         // AsyncInstantiateOperation<T> has GetAwaiter so no need to impl
         // public static UniTask<T[]>.Awaiter GetAwaiter<T>(this AsyncInstantiateOperation<T> operation) where T : Object
 
-        public static UniTask<UnityEngine.Object[]> WithCancellation<T>(this AsyncInstantiateOperation asyncOperation, CancellationToken cancellationToken)
-        {
+        public static UniTask<UnityEngine.Object[]> WithCancellation<T>(this AsyncInstantiateOperation asyncOperation, CancellationToken cancellationToken) {
             return ToUniTask(asyncOperation, cancellationToken: cancellationToken);
         }
 
-        public static UniTask<UnityEngine.Object[]> WithCancellation<T>(this AsyncInstantiateOperation asyncOperation, CancellationToken cancellationToken, bool cancelImmediately)
-        {
+        public static UniTask<UnityEngine.Object[]> WithCancellation<T>(this AsyncInstantiateOperation asyncOperation, CancellationToken cancellationToken, bool cancelImmediately) {
             return ToUniTask(asyncOperation, cancellationToken: cancellationToken, cancelImmediately: cancelImmediately);
         }
 
-        public static UniTask<UnityEngine.Object[]> ToUniTask(this AsyncInstantiateOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken), bool cancelImmediately = false)
-        {
+        public static UniTask<UnityEngine.Object[]> ToUniTask(this AsyncInstantiateOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken), bool cancelImmediately = false) {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             if (cancellationToken.IsCancellationRequested) return UniTask.FromCanceled<UnityEngine.Object[]>(cancellationToken);
             if (asyncOperation.isDone) return UniTask.FromResult(asyncOperation.Result);
@@ -36,34 +31,29 @@ namespace Cysharp.Threading.Tasks
         }
 
         public static UniTask<T[]> WithCancellation<T>(this AsyncInstantiateOperation<T> asyncOperation, CancellationToken cancellationToken)
-            where T : UnityEngine.Object
-        {
+            where T : UnityEngine.Object {
             return ToUniTask(asyncOperation, cancellationToken: cancellationToken);
         }
 
         public static UniTask<T[]> WithCancellation<T>(this AsyncInstantiateOperation<T> asyncOperation, CancellationToken cancellationToken, bool cancelImmediately)
-            where T : UnityEngine.Object
-        {
+            where T : UnityEngine.Object {
             return ToUniTask(asyncOperation, cancellationToken: cancellationToken, cancelImmediately: cancelImmediately);
         }
 
         public static UniTask<T[]> ToUniTask<T>(this AsyncInstantiateOperation<T> asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken), bool cancelImmediately = false)
-            where T : UnityEngine.Object
-        {
+            where T : UnityEngine.Object {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             if (cancellationToken.IsCancellationRequested) return UniTask.FromCanceled<T[]>(cancellationToken);
             if (asyncOperation.isDone) return UniTask.FromResult(asyncOperation.Result);
             return new UniTask<T[]>(AsyncInstantiateOperationConfiguredSource<T>.Create(asyncOperation, timing, progress, cancellationToken, cancelImmediately, out var token), token);
         }
 
-        sealed class AsyncInstantiateOperationConfiguredSource : IUniTaskSource<UnityEngine.Object[]>, IPlayerLoopItem, ITaskPoolNode<AsyncInstantiateOperationConfiguredSource>
-        {
+        sealed class AsyncInstantiateOperationConfiguredSource : IUniTaskSource<UnityEngine.Object[]>, IPlayerLoopItem, ITaskPoolNode<AsyncInstantiateOperationConfiguredSource> {
             static TaskPool<AsyncInstantiateOperationConfiguredSource> pool;
             AsyncInstantiateOperationConfiguredSource nextNode;
             public ref AsyncInstantiateOperationConfiguredSource NextNode => ref nextNode;
 
-            static AsyncInstantiateOperationConfiguredSource()
-            {
+            static AsyncInstantiateOperationConfiguredSource() {
                 TaskPool.RegisterSizeGetter(typeof(AsyncInstantiateOperationConfiguredSource), () => pool.Size);
             }
 
@@ -78,20 +68,16 @@ namespace Cysharp.Threading.Tasks
 
             Action<AsyncOperation> continuationAction;
 
-            AsyncInstantiateOperationConfiguredSource()
-            {
+            AsyncInstantiateOperationConfiguredSource() {
                 continuationAction = Continuation;
             }
 
-            public static IUniTaskSource<UnityEngine.Object[]> Create(AsyncInstantiateOperation asyncOperation, PlayerLoopTiming timing, IProgress<float> progress, CancellationToken cancellationToken, bool cancelImmediately, out short token)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
+            public static IUniTaskSource<UnityEngine.Object[]> Create(AsyncInstantiateOperation asyncOperation, PlayerLoopTiming timing, IProgress<float> progress, CancellationToken cancellationToken, bool cancelImmediately, out short token) {
+                if (cancellationToken.IsCancellationRequested) {
                     return AutoResetUniTaskCompletionSource<UnityEngine.Object[]>.CreateFromCanceled(cancellationToken, out token);
                 }
 
-                if (!pool.TryPop(out var result))
-                {
+                if (!pool.TryPop(out var result)) {
                     result = new AsyncInstantiateOperationConfiguredSource();
                 }
 
@@ -103,10 +89,8 @@ namespace Cysharp.Threading.Tasks
 
                 asyncOperation.completed += result.continuationAction;
 
-                if (cancelImmediately && cancellationToken.CanBeCanceled)
-                {
-                    result.cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state =>
-                    {
+                if (cancelImmediately && cancellationToken.CanBeCanceled) {
+                    result.cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state => {
                         var source = (AsyncInstantiateOperationConfiguredSource)state;
                         source.core.TrySetCanceled(source.cancellationToken);
                     }, result);
@@ -120,66 +104,50 @@ namespace Cysharp.Threading.Tasks
                 return result;
             }
 
-            public UnityEngine.Object[] GetResult(short token)
-            {
-                try
-                {
+            public UnityEngine.Object[] GetResult(short token) {
+                try {
                     return core.GetResult(token);
-                }
-                finally
-                {
-                    if (!(cancelImmediately && cancellationToken.IsCancellationRequested))
-                    {
+                } finally {
+                    if (!(cancelImmediately && cancellationToken.IsCancellationRequested)) {
                         TryReturn();
-                    }
-                    else
-                    {
+                    } else {
                         TaskTracker.RemoveTracking(this);
                     }
                 }
             }
 
-            void IUniTaskSource.GetResult(short token)
-            {
+            void IUniTaskSource.GetResult(short token) {
                 GetResult(token);
             }
 
-            public UniTaskStatus GetStatus(short token)
-            {
+            public UniTaskStatus GetStatus(short token) {
                 return core.GetStatus(token);
             }
 
-            public UniTaskStatus UnsafeGetStatus()
-            {
+            public UniTaskStatus UnsafeGetStatus() {
                 return core.UnsafeGetStatus();
             }
 
-            public void OnCompleted(Action<object> continuation, object state, short token)
-            {
+            public void OnCompleted(Action<object> continuation, object state, short token) {
                 core.OnCompleted(continuation, state, token);
             }
 
-            public bool MoveNext()
-            {
+            public bool MoveNext() {
                 // Already completed
-                if (completed || asyncOperation == null)
-                {
+                if (completed || asyncOperation == null) {
                     return false;
                 }
 
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     core.TrySetCanceled(cancellationToken);
                     return false;
                 }
 
-                if (progress != null)
-                {
+                if (progress != null) {
                     progress.Report(asyncOperation.progress);
                 }
 
-                if (asyncOperation.isDone)
-                {
+                if (asyncOperation.isDone) {
                     core.TrySetResult(asyncOperation.Result);
                     return false;
                 }
@@ -187,8 +155,7 @@ namespace Cysharp.Threading.Tasks
                 return true;
             }
 
-            bool TryReturn()
-            {
+            bool TryReturn() {
                 TaskTracker.RemoveTracking(this);
                 core.Reset();
                 asyncOperation.completed -= continuationAction;
@@ -200,33 +167,26 @@ namespace Cysharp.Threading.Tasks
                 return pool.TryPush(this);
             }
 
-            void Continuation(AsyncOperation _)
-            {
-                if (completed)
-                {
+            void Continuation(AsyncOperation _) {
+                if (completed) {
                     return;
                 }
                 completed = true;
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     core.TrySetCanceled(cancellationToken);
-                }
-                else
-                {
+                } else {
                     core.TrySetResult(asyncOperation.Result);
                 }
             }
         }
 
         sealed class AsyncInstantiateOperationConfiguredSource<T> : IUniTaskSource<T[]>, IPlayerLoopItem, ITaskPoolNode<AsyncInstantiateOperationConfiguredSource<T>>
-            where T : UnityEngine.Object
-        {
+            where T : UnityEngine.Object {
             static TaskPool<AsyncInstantiateOperationConfiguredSource<T>> pool;
             AsyncInstantiateOperationConfiguredSource<T> nextNode;
             public ref AsyncInstantiateOperationConfiguredSource<T> NextNode => ref nextNode;
 
-            static AsyncInstantiateOperationConfiguredSource()
-            {
+            static AsyncInstantiateOperationConfiguredSource() {
                 TaskPool.RegisterSizeGetter(typeof(AsyncInstantiateOperationConfiguredSource<T>), () => pool.Size);
             }
 
@@ -241,20 +201,16 @@ namespace Cysharp.Threading.Tasks
 
             Action<AsyncOperation> continuationAction;
 
-            AsyncInstantiateOperationConfiguredSource()
-            {
+            AsyncInstantiateOperationConfiguredSource() {
                 continuationAction = Continuation;
             }
 
-            public static IUniTaskSource<T[]> Create(AsyncInstantiateOperation<T> asyncOperation, PlayerLoopTiming timing, IProgress<float> progress, CancellationToken cancellationToken, bool cancelImmediately, out short token)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
+            public static IUniTaskSource<T[]> Create(AsyncInstantiateOperation<T> asyncOperation, PlayerLoopTiming timing, IProgress<float> progress, CancellationToken cancellationToken, bool cancelImmediately, out short token) {
+                if (cancellationToken.IsCancellationRequested) {
                     return AutoResetUniTaskCompletionSource<T[]>.CreateFromCanceled(cancellationToken, out token);
                 }
 
-                if (!pool.TryPop(out var result))
-                {
+                if (!pool.TryPop(out var result)) {
                     result = new AsyncInstantiateOperationConfiguredSource<T>();
                 }
 
@@ -266,10 +222,8 @@ namespace Cysharp.Threading.Tasks
 
                 asyncOperation.completed += result.continuationAction;
 
-                if (cancelImmediately && cancellationToken.CanBeCanceled)
-                {
-                    result.cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state =>
-                    {
+                if (cancelImmediately && cancellationToken.CanBeCanceled) {
+                    result.cancellationTokenRegistration = cancellationToken.RegisterWithoutCaptureExecutionContext(state => {
                         var source = (AsyncInstantiateOperationConfiguredSource<T>)state;
                         source.core.TrySetCanceled(source.cancellationToken);
                     }, result);
@@ -283,66 +237,50 @@ namespace Cysharp.Threading.Tasks
                 return result;
             }
 
-            public T[] GetResult(short token)
-            {
-                try
-                {
+            public T[] GetResult(short token) {
+                try {
                     return core.GetResult(token);
-                }
-                finally
-                {
-                    if (!(cancelImmediately && cancellationToken.IsCancellationRequested))
-                    {
+                } finally {
+                    if (!(cancelImmediately && cancellationToken.IsCancellationRequested)) {
                         TryReturn();
-                    }
-                    else
-                    {
+                    } else {
                         TaskTracker.RemoveTracking(this);
                     }
                 }
             }
 
-            void IUniTaskSource.GetResult(short token)
-            {
+            void IUniTaskSource.GetResult(short token) {
                 GetResult(token);
             }
 
-            public UniTaskStatus GetStatus(short token)
-            {
+            public UniTaskStatus GetStatus(short token) {
                 return core.GetStatus(token);
             }
 
-            public UniTaskStatus UnsafeGetStatus()
-            {
+            public UniTaskStatus UnsafeGetStatus() {
                 return core.UnsafeGetStatus();
             }
 
-            public void OnCompleted(Action<object> continuation, object state, short token)
-            {
+            public void OnCompleted(Action<object> continuation, object state, short token) {
                 core.OnCompleted(continuation, state, token);
             }
 
-            public bool MoveNext()
-            {
+            public bool MoveNext() {
                 // Already completed
-                if (completed || asyncOperation == null)
-                {
+                if (completed || asyncOperation == null) {
                     return false;
                 }
 
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     core.TrySetCanceled(cancellationToken);
                     return false;
                 }
 
-                if (progress != null)
-                {
+                if (progress != null) {
                     progress.Report(asyncOperation.progress);
                 }
 
-                if (asyncOperation.isDone)
-                {
+                if (asyncOperation.isDone) {
                     core.TrySetResult(asyncOperation.Result);
                     return false;
                 }
@@ -350,8 +288,7 @@ namespace Cysharp.Threading.Tasks
                 return true;
             }
 
-            bool TryReturn()
-            {
+            bool TryReturn() {
                 TaskTracker.RemoveTracking(this);
                 core.Reset();
                 asyncOperation.completed -= continuationAction;
@@ -363,19 +300,14 @@ namespace Cysharp.Threading.Tasks
                 return pool.TryPush(this);
             }
 
-            void Continuation(AsyncOperation _)
-            {
-                if (completed)
-                {
+            void Continuation(AsyncOperation _) {
+                if (completed) {
                     return;
                 }
                 completed = true;
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     core.TrySetCanceled(cancellationToken);
-                }
-                else
-                {
+                } else {
                     core.TrySetResult(asyncOperation.Result);
                 }
             }

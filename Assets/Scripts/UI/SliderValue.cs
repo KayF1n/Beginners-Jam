@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,7 +11,7 @@ public class SliderValue : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI label;
 
     [Header("Settings")]
-    [SerializeField] private string format = "0"; 
+    [SerializeField] private string format = "0";
     [Tooltip("Мінімальне значення, яке бачить користувач (наприклад, 0%)")]
     [SerializeField] private float minDisplayValue = 0f;
     [Tooltip("Максимальне значення, яке бачить користувач (наприклад, 100%)")]

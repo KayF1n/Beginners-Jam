@@ -3,84 +3,67 @@
 using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks
-{
-    public partial struct UniTask
-    {
+namespace Cysharp.Threading.Tasks {
+    public partial struct UniTask {
         #region OBSOLETE_RUN
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask Run(Action action, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask Run(Action action, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(action, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask Run(Action<object> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask Run(Action<object> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(action, state, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask Run(Func<UniTask> action, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask Run(Func<UniTask> action, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(action, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask Run(Func<object, UniTask> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask Run(Func<object, UniTask> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(action, state, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask<T> Run<T>(Func<T> func, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask<T> Run<T>(Func<T> func, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(func, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask<T> Run<T>(Func<UniTask<T>> func, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask<T> Run<T>(Func<UniTask<T>> func, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(func, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask<T> Run<T>(Func<object, T> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask<T> Run<T>(Func<object, T> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(func, state, configureAwait, cancellationToken);
         }
 
         [Obsolete("UniTask.Run is similar as Task.Run, it uses ThreadPool. For equivalent behaviour, use UniTask.RunOnThreadPool instead. If you don't want to use ThreadPool, you can use UniTask.Void(async void) or UniTask.Create(async UniTask) too.")]
-        public static UniTask<T> Run<T>(Func<object, UniTask<T>> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static UniTask<T> Run<T>(Func<object, UniTask<T>> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             return RunOnThreadPool(func, state, configureAwait, cancellationToken);
         }
 
         #endregion
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask RunOnThreadPool(Action action, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask RunOnThreadPool(Action action, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     action();
-                }
-                finally
-                {
+                } finally {
                     await UniTask.Yield();
                 }
-            }
-            else
-            {
+            } else {
                 action();
             }
 
@@ -88,27 +71,20 @@ namespace Cysharp.Threading.Tasks
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask RunOnThreadPool(Action<object> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask RunOnThreadPool(Action<object> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     action(state);
-                }
-                finally
-                {
+                } finally {
                     await UniTask.Yield();
                 }
-            }
-            else
-            {
+            } else {
                 action(state);
             }
 
@@ -116,27 +92,20 @@ namespace Cysharp.Threading.Tasks
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask RunOnThreadPool(Func<UniTask> action, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask RunOnThreadPool(Func<UniTask> action, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     await action();
-                }
-                finally
-                {
+                } finally {
                     await UniTask.Yield();
                 }
-            }
-            else
-            {
+            } else {
                 await action();
             }
 
@@ -144,27 +113,20 @@ namespace Cysharp.Threading.Tasks
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask RunOnThreadPool(Func<object, UniTask> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask RunOnThreadPool(Func<object, UniTask> action, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     await action(state);
-                }
-                finally
-                {
+                } finally {
                     await UniTask.Yield();
                 }
-            }
-            else
-            {
+            } else {
                 await action(state);
             }
 
@@ -172,56 +134,42 @@ namespace Cysharp.Threading.Tasks
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask<T> RunOnThreadPool<T>(Func<T> func, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask<T> RunOnThreadPool<T>(Func<T> func, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     return func();
-                }
-                finally
-                {
+                } finally {
                     await UniTask.Yield();
                     cancellationToken.ThrowIfCancellationRequested();
                 }
-            }
-            else
-            {
+            } else {
                 return func();
             }
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask<T> RunOnThreadPool<T>(Func<UniTask<T>> func, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask<T> RunOnThreadPool<T>(Func<UniTask<T>> func, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     return await func();
-                }
-                finally
-                {
+                } finally {
                     cancellationToken.ThrowIfCancellationRequested();
                     await UniTask.Yield();
                     cancellationToken.ThrowIfCancellationRequested();
                 }
-            }
-            else
-            {
+            } else {
                 var result = await func();
                 cancellationToken.ThrowIfCancellationRequested();
                 return result;
@@ -229,56 +177,42 @@ namespace Cysharp.Threading.Tasks
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask<T> RunOnThreadPool<T>(Func<object, T> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask<T> RunOnThreadPool<T>(Func<object, T> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     return func(state);
-                }
-                finally
-                {
+                } finally {
                     await UniTask.Yield();
                     cancellationToken.ThrowIfCancellationRequested();
                 }
-            }
-            else
-            {
+            } else {
                 return func(state);
             }
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask<T> RunOnThreadPool<T>(Func<object, UniTask<T>> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default)
-        {
+        public static async UniTask<T> RunOnThreadPool<T>(Func<object, UniTask<T>> func, object state, bool configureAwait = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             await UniTask.SwitchToThreadPool();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (configureAwait)
-            {
-                try
-                {
+            if (configureAwait) {
+                try {
                     return await func(state);
-                }
-                finally
-                {
+                } finally {
                     cancellationToken.ThrowIfCancellationRequested();
                     await UniTask.Yield();
                     cancellationToken.ThrowIfCancellationRequested();
                 }
-            }
-            else
-            {
+            } else {
                 var result = await func(state);
                 cancellationToken.ThrowIfCancellationRequested();
                 return result;

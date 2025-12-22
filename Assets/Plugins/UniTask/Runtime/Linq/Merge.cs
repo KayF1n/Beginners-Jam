@@ -1,23 +1,19 @@
+using Cysharp.Threading.Tasks.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Cysharp.Threading.Tasks.Internal;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IUniTaskAsyncEnumerable<T> Merge<T>(this IUniTaskAsyncEnumerable<T> first, IUniTaskAsyncEnumerable<T> second)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IUniTaskAsyncEnumerable<T> Merge<T>(this IUniTaskAsyncEnumerable<T> first, IUniTaskAsyncEnumerable<T> second) {
             Error.ThrowArgumentNullException(first, nameof(first));
             Error.ThrowArgumentNullException(second, nameof(second));
 
-            return new Merge<T>(new [] { first, second });
+            return new Merge<T>(new[] { first, second });
         }
 
-        public static IUniTaskAsyncEnumerable<T> Merge<T>(this IUniTaskAsyncEnumerable<T> first, IUniTaskAsyncEnumerable<T> second, IUniTaskAsyncEnumerable<T> third)
-        {
+        public static IUniTaskAsyncEnumerable<T> Merge<T>(this IUniTaskAsyncEnumerable<T> first, IUniTaskAsyncEnumerable<T> second, IUniTaskAsyncEnumerable<T> third) {
             Error.ThrowArgumentNullException(first, nameof(first));
             Error.ThrowArgumentNullException(second, nameof(second));
             Error.ThrowArgumentNullException(third, nameof(third));
@@ -25,27 +21,22 @@ namespace Cysharp.Threading.Tasks.Linq
             return new Merge<T>(new[] { first, second, third });
         }
 
-        public static IUniTaskAsyncEnumerable<T> Merge<T>(this IEnumerable<IUniTaskAsyncEnumerable<T>> sources)
-        {
+        public static IUniTaskAsyncEnumerable<T> Merge<T>(this IEnumerable<IUniTaskAsyncEnumerable<T>> sources) {
             return sources is IUniTaskAsyncEnumerable<T>[] array
                 ? new Merge<T>(array)
                 : new Merge<T>(sources.ToArray());
         }
 
-        public static IUniTaskAsyncEnumerable<T> Merge<T>(params IUniTaskAsyncEnumerable<T>[] sources)
-        {
+        public static IUniTaskAsyncEnumerable<T> Merge<T>(params IUniTaskAsyncEnumerable<T>[] sources) {
             return new Merge<T>(sources);
         }
     }
 
-    internal sealed class Merge<T> : IUniTaskAsyncEnumerable<T>
-    {
+    internal sealed class Merge<T> : IUniTaskAsyncEnumerable<T> {
         readonly IUniTaskAsyncEnumerable<T>[] sources;
 
-        public Merge(IUniTaskAsyncEnumerable<T>[] sources)
-        {
-            if (sources.Length <= 0)
-            {
+        public Merge(IUniTaskAsyncEnumerable<T>[] sources) {
+            if (sources.Length <= 0) {
                 Error.ThrowArgumentException("No source async enumerable to merge");
             }
             this.sources = sources;
@@ -54,15 +45,13 @@ namespace Cysharp.Threading.Tasks.Linq
         public IUniTaskAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
             => new _Merge(sources, cancellationToken);
 
-        enum MergeSourceState
-        {
+        enum MergeSourceState {
             Pending,
             Running,
             Completed,
         }
 
-        sealed class _Merge : MoveNextSource, IUniTaskAsyncEnumerator<T>
-        {
+        sealed class _Merge : MoveNextSource, IUniTaskAsyncEnumerator<T> {
             static readonly Action<object> GetResultAtAction = GetResultAt;
 
             readonly int length;
@@ -75,77 +64,59 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public T Current { get; private set; }
 
-            public _Merge(IUniTaskAsyncEnumerable<T>[] sources, CancellationToken cancellationToken)
-            {
+            public _Merge(IUniTaskAsyncEnumerable<T>[] sources, CancellationToken cancellationToken) {
                 this.cancellationToken = cancellationToken;
                 length = sources.Length;
                 states = ArrayPool<MergeSourceState>.Shared.Rent(length);
                 enumerators = ArrayPool<IUniTaskAsyncEnumerator<T>>.Shared.Rent(length);
-                for (var i = 0; i < length; i++)
-                {
+                for (var i = 0; i < length; i++) {
                     enumerators[i] = sources[i].GetAsyncEnumerator(cancellationToken);
-                    states[i] = (int)MergeSourceState.Pending;;
+                    states[i] = (int)MergeSourceState.Pending; ;
                 }
             }
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
                 completionSource.Reset();
                 Interlocked.Exchange(ref moveNextCompleted, 0);
 
-                if (HasQueuedResult() && Interlocked.CompareExchange(ref moveNextCompleted, 1, 0) == 0)
-                {
+                if (HasQueuedResult() && Interlocked.CompareExchange(ref moveNextCompleted, 1, 0) == 0) {
                     (T, Exception, bool) value;
-                    lock (states)
-                    {
+                    lock (states) {
                         value = queuedResult.Dequeue();
                     }
                     var resultValue = value.Item1;
                     var exception = value.Item2;
                     var hasNext = value.Item3;
-                    if (exception != null)
-                    {
+                    if (exception != null) {
                         completionSource.TrySetException(exception);
-                    }
-                    else
-                    {
+                    } else {
                         Current = resultValue;
                         completionSource.TrySetResult(hasNext);
                     }
                     return new UniTask<bool>(this, completionSource.Version);
                 }
 
-                for (var i = 0; i < length; i++)
-                {
-                    lock (states)
-                    {
-                        if (states[i] == MergeSourceState.Pending)
-                        {
+                for (var i = 0; i < length; i++) {
+                    lock (states) {
+                        if (states[i] == MergeSourceState.Pending) {
                             states[i] = MergeSourceState.Running;
-                        }
-                        else
-                        {
+                        } else {
                             continue;
                         }
                     }
                     var awaiter = enumerators[i].MoveNextAsync().GetAwaiter();
-                    if (awaiter.IsCompleted)
-                    {
+                    if (awaiter.IsCompleted) {
                         GetResultAt(i, awaiter);
-                    }
-                    else
-                    {
+                    } else {
                         awaiter.SourceOnCompleted(GetResultAtAction, StateTuple.Create(this, i, awaiter));
                     }
                 }
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            public async UniTask DisposeAsync()
-            {
-                for (var i = 0; i < length; i++)
-                {
+            public async UniTask DisposeAsync() {
+                for (var i = 0; i < length; i++) {
                     await enumerators[i].DisposeAsync();
                 }
 
@@ -153,76 +124,54 @@ namespace Cysharp.Threading.Tasks.Linq
                 ArrayPool<IUniTaskAsyncEnumerator<T>>.Shared.Return(enumerators, true);
             }
 
-            static void GetResultAt(object state)
-            {
-                using (var tuple = (StateTuple<_Merge, int, UniTask<bool>.Awaiter>)state)
-                {
+            static void GetResultAt(object state) {
+                using (var tuple = (StateTuple<_Merge, int, UniTask<bool>.Awaiter>)state) {
                     tuple.Item1.GetResultAt(tuple.Item2, tuple.Item3);
                 }
             }
 
-            void GetResultAt(int index, UniTask<bool>.Awaiter awaiter)
-            {
+            void GetResultAt(int index, UniTask<bool>.Awaiter awaiter) {
                 bool hasNext;
                 bool completedAll;
-                try
-                {
+                try {
                     hasNext = awaiter.GetResult();
-                }
-                catch (Exception ex)
-                {
-                    if (Interlocked.CompareExchange(ref moveNextCompleted, 1, 0) == 0)
-                    {
+                } catch (Exception ex) {
+                    if (Interlocked.CompareExchange(ref moveNextCompleted, 1, 0) == 0) {
                         completionSource.TrySetException(ex);
-                    }
-                    else
-                    {
-                        lock (states)
-                        {
+                    } else {
+                        lock (states) {
                             queuedResult.Enqueue((default, ex, default));
                         }
                     }
                     return;
                 }
 
-                lock (states)
-                {
+                lock (states) {
                     states[index] = hasNext ? MergeSourceState.Pending : MergeSourceState.Completed;
                     completedAll = !hasNext && IsCompletedAll();
                 }
-                if (hasNext || completedAll)
-                {
-                    if (Interlocked.CompareExchange(ref moveNextCompleted, 1, 0) == 0)
-                    {
+                if (hasNext || completedAll) {
+                    if (Interlocked.CompareExchange(ref moveNextCompleted, 1, 0) == 0) {
                         Current = enumerators[index].Current;
                         completionSource.TrySetResult(!completedAll);
-                    }
-                    else
-                    {
-                        lock (states)
-                        {
+                    } else {
+                        lock (states) {
                             queuedResult.Enqueue((enumerators[index].Current, null, !completedAll));
                         }
                     }
                 }
             }
 
-            bool HasQueuedResult()
-            {
-                lock (states)
-                {
+            bool HasQueuedResult() {
+                lock (states) {
                     return queuedResult.Count > 0;
                 }
             }
 
-            bool IsCompletedAll()
-            {
-                lock (states)
-                {
-                    for (var i = 0; i < length; i++)
-                    {
-                        if (states[i] != MergeSourceState.Completed)
-                        {
+            bool IsCompletedAll() {
+                lock (states) {
+                    for (var i = 0; i < length; i++) {
+                        if (states[i] != MergeSourceState.Completed) {
                             return false;
                         }
                     }

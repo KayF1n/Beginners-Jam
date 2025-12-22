@@ -7,28 +7,23 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace Cysharp.Threading.Tasks.CompilerServices
-{
+namespace Cysharp.Threading.Tasks.CompilerServices {
     [StructLayout(LayoutKind.Auto)]
-    public struct AsyncUniTaskVoidMethodBuilder
-    {
+    public struct AsyncUniTaskVoidMethodBuilder {
         IStateMachineRunner runner;
 
         // 1. Static Create method.
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static AsyncUniTaskVoidMethodBuilder Create()
-        {
+        public static AsyncUniTaskVoidMethodBuilder Create() {
             return default;
         }
 
         // 2. TaskLike Task property(void)
-        public UniTaskVoid Task
-        {
+        public UniTaskVoid Task {
             [DebuggerHidden]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
+            get {
                 return default;
             }
         }
@@ -36,11 +31,9 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 3. SetException
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetException(Exception exception)
-        {
+        public void SetException(Exception exception) {
             // runner is finished, return first.
-            if (runner != null)
-            {
+            if (runner != null) {
 #if ENABLE_IL2CPP
                 // workaround for IL2CPP bug.
                 PlayerLoopHelper.AddContinuation(PlayerLoopTiming.LastPostLateUpdate, runner.ReturnAction);
@@ -56,11 +49,9 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 4. SetResult
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetResult()
-        {
+        public void SetResult() {
             // runner is finished, return.
-            if (runner != null)
-            {
+            if (runner != null) {
 #if ENABLE_IL2CPP
                 // workaround for IL2CPP bug.
                 PlayerLoopHelper.AddContinuation(PlayerLoopTiming.LastPostLateUpdate, runner.ReturnAction);
@@ -76,10 +67,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            if (runner == null)
-            {
+            where TStateMachine : IAsyncStateMachine {
+            if (runner == null) {
                 AsyncUniTaskVoid<TStateMachine>.SetStateMachine(ref stateMachine, ref runner);
             }
 
@@ -92,10 +81,8 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-            if (runner == null)
-            {
+            where TStateMachine : IAsyncStateMachine {
+            if (runner == null) {
                 AsyncUniTaskVoid<TStateMachine>.SetStateMachine(ref stateMachine, ref runner);
             }
 
@@ -105,27 +92,22 @@ namespace Cysharp.Threading.Tasks.CompilerServices
         // 7. Start
         [DebuggerHidden]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
-            where TStateMachine : IAsyncStateMachine
-        {
+            where TStateMachine : IAsyncStateMachine {
             stateMachine.MoveNext();
         }
 
         // 8. SetStateMachine
         [DebuggerHidden]
-        public void SetStateMachine(IAsyncStateMachine stateMachine)
-        {
+        public void SetStateMachine(IAsyncStateMachine stateMachine) {
             // don't use boxed stateMachine.
         }
 
 #if DEBUG || !UNITY_2018_3_OR_NEWER
         // Important for IDE debugger.
         object debuggingId;
-        private object ObjectIdForDebugger
-        {
-            get
-            {
-                if (debuggingId == null)
-                {
+        private object ObjectIdForDebugger {
+            get {
+                if (debuggingId == null) {
                     debuggingId = new object();
                 }
                 return debuggingId;

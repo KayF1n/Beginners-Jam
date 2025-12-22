@@ -2,29 +2,23 @@
 using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IObservable<TSource> ToObservable<TSource>(this IUniTaskAsyncEnumerable<TSource> source)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IObservable<TSource> ToObservable<TSource>(this IUniTaskAsyncEnumerable<TSource> source) {
             Error.ThrowArgumentNullException(source, nameof(source));
 
             return new ToObservable<TSource>(source);
         }
     }
 
-    internal sealed class ToObservable<T> : IObservable<T>
-    {
+    internal sealed class ToObservable<T> : IObservable<T> {
         readonly IUniTaskAsyncEnumerable<T> source;
 
-        public ToObservable(IUniTaskAsyncEnumerable<T> source)
-        {
+        public ToObservable(IUniTaskAsyncEnumerable<T> source) {
             this.source = source;
         }
 
-        public IDisposable Subscribe(IObserver<T> observer)
-        {
+        public IDisposable Subscribe(IObserver<T> observer) {
             var ctd = new CancellationTokenDisposable();
 
             RunAsync(source, observer, ctd.Token).Forget();
@@ -32,26 +26,19 @@ namespace Cysharp.Threading.Tasks.Linq
             return ctd;
         }
 
-        static async UniTaskVoid RunAsync(IUniTaskAsyncEnumerable<T> src, IObserver<T> observer, CancellationToken cancellationToken)
-        {
+        static async UniTaskVoid RunAsync(IUniTaskAsyncEnumerable<T> src, IObserver<T> observer, CancellationToken cancellationToken) {
             // cancellationToken.IsCancellationRequested is called when Rx's Disposed.
             // when disposed, finish silently.
 
             var e = src.GetAsyncEnumerator(cancellationToken);
-            try
-            {
+            try {
                 bool hasNext;
 
-                do
-                {
-                    try
-                    {
+                do {
+                    try {
                         hasNext = await e.MoveNextAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
+                    } catch (Exception ex) {
+                        if (cancellationToken.IsCancellationRequested) {
                             return;
                         }
 
@@ -59,36 +46,27 @@ namespace Cysharp.Threading.Tasks.Linq
                         return;
                     }
 
-                    if (hasNext)
-                    {
+                    if (hasNext) {
                         observer.OnNext(e.Current);
-                    }
-                    else
-                    {
+                    } else {
                         observer.OnCompleted();
                         return;
                     }
                 } while (!cancellationToken.IsCancellationRequested);
-            }
-            finally
-            {
-                if (e != null)
-                {
+            } finally {
+                if (e != null) {
                     await e.DisposeAsync();
                 }
             }
         }
 
-        internal sealed class CancellationTokenDisposable : IDisposable
-        {
+        internal sealed class CancellationTokenDisposable : IDisposable {
             readonly CancellationTokenSource cts = new CancellationTokenSource();
 
             public CancellationToken Token => cts.Token;
 
-            public void Dispose()
-            {
-                if (!cts.IsCancellationRequested)
-                {
+            public void Dispose() {
+                if (!cts.IsCancellationRequested) {
                     cts.Cancel();
                 }
             }

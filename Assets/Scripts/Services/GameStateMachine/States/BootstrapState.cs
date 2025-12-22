@@ -1,17 +1,22 @@
 public class BootstrapState : State {
-    private ISaveLoadService saveLoadService;
-    private IAudioService audioService;
+    private ISaveLoadService _saveLoadService;
+    private IAudioService _audioService;
     public BootstrapState(IStateMachine stateMachine, ISaveLoadService saveLoadService, IAudioService audioService) : base(stateMachine) {
-        this.saveLoadService = saveLoadService;
-        this.audioService = audioService;
+        _saveLoadService = saveLoadService;
+        this._audioService = audioService;
     }
 
     public override void Enter() {
-        AudioServiceSaveAdapter audioServiceSaveAdapter = new AudioServiceSaveAdapter(audioService);
-        saveLoadService.Register<AudioSettings>(audioServiceSaveAdapter);
+        RegisterSaveableServices();
 
-        saveLoadService.LoadAll();
+        _saveLoadService.LoadAll();
         StateMachine.ChangeState<GameLoopState>();
+    }
+
+    private void RegisterSaveableServices() {
+        var audioAdapter = new AudioServiceSaveAdapter(_audioService);
+        _saveLoadService.Register<AudioSettings>(audioAdapter);
+        // Тут можна додати інші адаптери
     }
 
     public override void Exit() {

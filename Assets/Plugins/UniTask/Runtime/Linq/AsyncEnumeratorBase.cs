@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
+namespace Cysharp.Threading.Tasks.Linq {
     // note: refactor all inherit class and should remove this.
     // see Select and Where.
-    internal abstract class AsyncEnumeratorBase<TSource, TResult> : MoveNextSource, IUniTaskAsyncEnumerator<TResult>
-    {
+    internal abstract class AsyncEnumeratorBase<TSource, TResult> : MoveNextSource, IUniTaskAsyncEnumerator<TResult> {
         static readonly Action<object> moveNextCallbackDelegate = MoveNextCallBack;
 
         readonly IUniTaskAsyncEnumerable<TSource> source;
@@ -15,8 +13,7 @@ namespace Cysharp.Threading.Tasks.Linq
         IUniTaskAsyncEnumerator<TSource> enumerator;
         UniTask<bool>.Awaiter sourceMoveNext;
 
-        public AsyncEnumeratorBase(IUniTaskAsyncEnumerable<TSource> source, CancellationToken cancellationToken)
-        {
+        public AsyncEnumeratorBase(IUniTaskAsyncEnumerable<TSource> source, CancellationToken cancellationToken) {
             this.source = source;
             this.cancellationToken = cancellationToken;
             TaskTracker.TrackActiveTask(this, 4);
@@ -36,103 +33,77 @@ namespace Cysharp.Threading.Tasks.Linq
 
         public TResult Current { get; protected set; }
 
-        public UniTask<bool> MoveNextAsync()
-        {
-            if (enumerator == null)
-            {
+        public UniTask<bool> MoveNextAsync() {
+            if (enumerator == null) {
                 enumerator = source.GetAsyncEnumerator(cancellationToken);
             }
 
             completionSource.Reset();
-            if (!OnFirstIteration())
-            {
+            if (!OnFirstIteration()) {
                 SourceMoveNext();
             }
             return new UniTask<bool>(this, completionSource.Version);
         }
 
-        protected virtual bool OnFirstIteration()
-        {
+        protected virtual bool OnFirstIteration() {
             return false;
         }
 
-        protected void SourceMoveNext()
-        {
-            CONTINUE:
+        protected void SourceMoveNext() {
+        CONTINUE:
             sourceMoveNext = enumerator.MoveNextAsync().GetAwaiter();
-            if (sourceMoveNext.IsCompleted)
-            {
+            if (sourceMoveNext.IsCompleted) {
                 bool result = false;
-                try
-                {
-                    if (!TryMoveNextCore(sourceMoveNext.GetResult(), out result))
-                    {
+                try {
+                    if (!TryMoveNextCore(sourceMoveNext.GetResult(), out result)) {
                         goto CONTINUE;
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                     return;
                 }
 
-                if (cancellationToken.IsCancellationRequested)
-                {
+                if (cancellationToken.IsCancellationRequested) {
                     completionSource.TrySetCanceled(cancellationToken);
-                }
-                else
-                {
+                } else {
                     completionSource.TrySetResult(result);
                 }
-            }
-            else
-            {
+            } else {
                 sourceMoveNext.SourceOnCompleted(moveNextCallbackDelegate, this);
             }
         }
 
-        static void MoveNextCallBack(object state)
-        {
+        static void MoveNextCallBack(object state) {
             var self = (AsyncEnumeratorBase<TSource, TResult>)state;
             bool result;
-            try
-            {
-                if (!self.TryMoveNextCore(self.sourceMoveNext.GetResult(), out result))
-                {
+            try {
+                if (!self.TryMoveNextCore(self.sourceMoveNext.GetResult(), out result)) {
                     self.SourceMoveNext();
                     return;
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 self.completionSource.TrySetException(ex);
                 return;
             }
 
-            if (self.cancellationToken.IsCancellationRequested)
-            {
+            if (self.cancellationToken.IsCancellationRequested) {
                 self.completionSource.TrySetCanceled(self.cancellationToken);
-            }
-            else
-            {
+            } else {
                 self.completionSource.TrySetResult(result);
             }
         }
 
         // if require additional resource to dispose, override and call base.DisposeAsync.
-        public virtual UniTask DisposeAsync()
-        {
+        public virtual UniTask DisposeAsync() {
             TaskTracker.RemoveTracking(this);
-            if (enumerator != null)
-            {
+            if (enumerator != null) {
                 return enumerator.DisposeAsync();
             }
             return default;
         }
     }
 
-    internal abstract class AsyncEnumeratorAwaitSelectorBase<TSource, TResult, TAwait> : MoveNextSource, IUniTaskAsyncEnumerator<TResult>
-    {
+    internal abstract class AsyncEnumeratorAwaitSelectorBase<TSource, TResult, TAwait> : MoveNextSource, IUniTaskAsyncEnumerator<TResult> {
         static readonly Action<object> moveNextCallbackDelegate = MoveNextCallBack;
         static readonly Action<object> setCurrentCallbackDelegate = SetCurrentCallBack;
 
@@ -145,8 +116,7 @@ namespace Cysharp.Threading.Tasks.Linq
 
         UniTask<TAwait>.Awaiter resultAwaiter;
 
-        public AsyncEnumeratorAwaitSelectorBase(IUniTaskAsyncEnumerable<TSource> source, CancellationToken cancellationToken)
-        {
+        public AsyncEnumeratorAwaitSelectorBase(IUniTaskAsyncEnumerable<TSource> source, CancellationToken cancellationToken) {
             this.source = source;
             this.cancellationToken = cancellationToken;
             TaskTracker.TrackActiveTask(this, 4);
@@ -160,15 +130,11 @@ namespace Cysharp.Threading.Tasks.Linq
         // Util
         protected TSource SourceCurrent { get; private set; }
 
-        protected (bool waitCallback, bool requireNextIteration) ActionCompleted(bool trySetCurrentResult, out bool moveNextResult)
-        {
-            if (trySetCurrentResult)
-            {
+        protected (bool waitCallback, bool requireNextIteration) ActionCompleted(bool trySetCurrentResult, out bool moveNextResult) {
+            if (trySetCurrentResult) {
                 moveNextResult = true;
                 return (false, false);
-            }
-            else
-            {
+            } else {
                 moveNextResult = default;
                 return (false, true);
             }
@@ -180,10 +146,8 @@ namespace Cysharp.Threading.Tasks.Linq
 
         public TResult Current { get; protected set; }
 
-        public UniTask<bool> MoveNextAsync()
-        {
-            if (enumerator == null)
-            {
+        public UniTask<bool> MoveNextAsync() {
+            if (enumerator == null) {
                 enumerator = source.GetAsyncEnumerator(cancellationToken);
             }
 
@@ -192,61 +156,44 @@ namespace Cysharp.Threading.Tasks.Linq
             return new UniTask<bool>(this, completionSource.Version);
         }
 
-        protected void SourceMoveNext()
-        {
-            CONTINUE:
+        protected void SourceMoveNext() {
+        CONTINUE:
             sourceMoveNext = enumerator.MoveNextAsync().GetAwaiter();
-            if (sourceMoveNext.IsCompleted)
-            {
+            if (sourceMoveNext.IsCompleted) {
                 bool result = false;
-                try
-                {
+                try {
                     (bool waitCallback, bool requireNextIteration) = TryMoveNextCore(sourceMoveNext.GetResult(), out result);
 
-                    if (waitCallback)
-                    {
+                    if (waitCallback) {
                         return;
                     }
 
-                    if (requireNextIteration)
-                    {
+                    if (requireNextIteration) {
                         goto CONTINUE;
-                    }
-                    else
-                    {
+                    } else {
                         completionSource.TrySetResult(result);
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                     return;
                 }
-            }
-            else
-            {
+            } else {
                 sourceMoveNext.SourceOnCompleted(moveNextCallbackDelegate, this);
             }
         }
 
-        (bool waitCallback, bool requireNextIteration) TryMoveNextCore(bool sourceHasCurrent, out bool result)
-        {
-            if (sourceHasCurrent)
-            {
+        (bool waitCallback, bool requireNextIteration) TryMoveNextCore(bool sourceHasCurrent, out bool result) {
+            if (sourceHasCurrent) {
                 SourceCurrent = enumerator.Current;
                 var task = TransformAsync(SourceCurrent);
-                if (UnwarapTask(task, out var taskResult))
-                {
+                if (UnwarapTask(task, out var taskResult)) {
                     var currentResult = TrySetCurrentCore(taskResult, out var terminateIteration);
-                    if (terminateIteration)
-                    {
+                    if (terminateIteration) {
                         return IterateFinished(out result);
                     }
 
                     return ActionCompleted(currentResult, out result);
-                }
-                else
-                {
+                } else {
                     return WaitAwaitCallback(out result);
                 }
             }
@@ -254,88 +201,63 @@ namespace Cysharp.Threading.Tasks.Linq
             return IterateFinished(out result);
         }
 
-        protected bool UnwarapTask(UniTask<TAwait> taskResult, out TAwait result)
-        {
+        protected bool UnwarapTask(UniTask<TAwait> taskResult, out TAwait result) {
             resultAwaiter = taskResult.GetAwaiter();
 
-            if (resultAwaiter.IsCompleted)
-            {
+            if (resultAwaiter.IsCompleted) {
                 result = resultAwaiter.GetResult();
                 return true;
-            }
-            else
-            {
+            } else {
                 resultAwaiter.SourceOnCompleted(setCurrentCallbackDelegate, this);
                 result = default;
                 return false;
             }
         }
 
-        static void MoveNextCallBack(object state)
-        {
+        static void MoveNextCallBack(object state) {
             var self = (AsyncEnumeratorAwaitSelectorBase<TSource, TResult, TAwait>)state;
             bool result = false;
-            try
-            {
+            try {
                 (bool waitCallback, bool requireNextIteration) = self.TryMoveNextCore(self.sourceMoveNext.GetResult(), out result);
 
-                if (waitCallback)
-                {
+                if (waitCallback) {
                     return;
                 }
 
-                if (requireNextIteration)
-                {
+                if (requireNextIteration) {
                     self.SourceMoveNext();
                     return;
-                }
-                else
-                {
+                } else {
                     self.completionSource.TrySetResult(result);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 self.completionSource.TrySetException(ex);
                 return;
             }
         }
 
-        static void SetCurrentCallBack(object state)
-        {
+        static void SetCurrentCallBack(object state) {
             var self = (AsyncEnumeratorAwaitSelectorBase<TSource, TResult, TAwait>)state;
 
             bool doneSetCurrent;
             bool terminateIteration;
-            try
-            {
+            try {
                 var result = self.resultAwaiter.GetResult();
                 doneSetCurrent = self.TrySetCurrentCore(result, out terminateIteration);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 self.completionSource.TrySetException(ex);
                 return;
             }
 
-            if (self.cancellationToken.IsCancellationRequested)
-            {
+            if (self.cancellationToken.IsCancellationRequested) {
                 self.completionSource.TrySetCanceled(self.cancellationToken);
-            }
-            else
-            {
-                if (doneSetCurrent)
-                {
+            } else {
+                if (doneSetCurrent) {
                     self.completionSource.TrySetResult(true);
-                }
-                else
-                {
-                    if (terminateIteration)
-                    {
+                } else {
+                    if (terminateIteration) {
                         self.completionSource.TrySetResult(false);
-                    }
-                    else
-                    {
+                    } else {
                         self.SourceMoveNext();
                     }
                 }
@@ -343,11 +265,9 @@ namespace Cysharp.Threading.Tasks.Linq
         }
 
         // if require additional resource to dispose, override and call base.DisposeAsync.
-        public virtual UniTask DisposeAsync()
-        {
+        public virtual UniTask DisposeAsync() {
             TaskTracker.RemoveTracking(this);
-            if (enumerator != null)
-            {
+            if (enumerator != null) {
                 return enumerator.DisposeAsync();
             }
             return default;

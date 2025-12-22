@@ -3,37 +3,28 @@
 using System.Threading;
 using UnityEngine;
 
-namespace Cysharp.Threading.Tasks.Triggers
-{
-    public static partial class AsyncTriggerExtensions
-    {
-        public static AsyncDestroyTrigger GetAsyncDestroyTrigger(this GameObject gameObject)
-        {
+namespace Cysharp.Threading.Tasks.Triggers {
+    public static partial class AsyncTriggerExtensions {
+        public static AsyncDestroyTrigger GetAsyncDestroyTrigger(this GameObject gameObject) {
             return GetOrAddComponent<AsyncDestroyTrigger>(gameObject);
         }
 
-        public static AsyncDestroyTrigger GetAsyncDestroyTrigger(this Component component)
-        {
+        public static AsyncDestroyTrigger GetAsyncDestroyTrigger(this Component component) {
             return component.gameObject.GetAsyncDestroyTrigger();
         }
     }
 
     [DisallowMultipleComponent]
-    public sealed class AsyncDestroyTrigger : MonoBehaviour
-    {
+    public sealed class AsyncDestroyTrigger : MonoBehaviour {
         bool awakeCalled = false;
         bool called = false;
         CancellationTokenSource cancellationTokenSource;
 
-        public CancellationToken CancellationToken
-        {
-            get
-            {
-                if (cancellationTokenSource == null)
-                {
+        public CancellationToken CancellationToken {
+            get {
+                if (cancellationTokenSource == null) {
                     cancellationTokenSource = new CancellationTokenSource();
-                    if (!awakeCalled)
-                    {
+                    if (!awakeCalled) {
                         PlayerLoopHelper.AddAction(PlayerLoopTiming.Update, new AwakeMonitor(this));
                     }
                 }
@@ -41,28 +32,24 @@ namespace Cysharp.Threading.Tasks.Triggers
             }
         }
 
-        void Awake()
-        {
+        void Awake() {
             awakeCalled = true;
         }
 
-        void OnDestroy()
-        {
+        void OnDestroy() {
             called = true;
 
             cancellationTokenSource?.Cancel();
             cancellationTokenSource?.Dispose();
         }
 
-        public UniTask OnDestroyAsync()
-        {
+        public UniTask OnDestroyAsync() {
             if (called) return UniTask.CompletedTask;
 
             var tcs = new UniTaskCompletionSource();
 
             // OnDestroy = Called Cancel.
-            CancellationToken.RegisterWithoutCaptureExecutionContext(state =>
-            {
+            CancellationToken.RegisterWithoutCaptureExecutionContext(state => {
                 var tcs2 = (UniTaskCompletionSource)state;
                 tcs2.TrySetResult();
             }, tcs);
@@ -70,20 +57,16 @@ namespace Cysharp.Threading.Tasks.Triggers
             return tcs.Task;
         }
 
-        class AwakeMonitor : IPlayerLoopItem
-        {
+        class AwakeMonitor : IPlayerLoopItem {
             readonly AsyncDestroyTrigger trigger;
 
-            public AwakeMonitor(AsyncDestroyTrigger trigger)
-            {
+            public AwakeMonitor(AsyncDestroyTrigger trigger) {
                 this.trigger = trigger;
             }
 
-            public bool MoveNext()
-            {
+            public bool MoveNext() {
                 if (trigger.called || trigger.awakeCalled) return false;
-                if (trigger == null)
-                {
+                if (trigger == null) {
                     trigger.OnDestroy();
                     return false;
                 }

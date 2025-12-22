@@ -2,10 +2,8 @@
 using System;
 using UnityEngine;
 
-namespace Cysharp.Threading.Tasks.Internal
-{
-    internal sealed class PlayerLoopRunner
-    {
+namespace Cysharp.Threading.Tasks.Internal {
+    internal sealed class PlayerLoopRunner {
         const int InitialSize = 16;
 
         readonly PlayerLoopTiming timing;
@@ -20,44 +18,34 @@ namespace Cysharp.Threading.Tasks.Internal
 
 
 
-        public PlayerLoopRunner(PlayerLoopTiming timing)
-        {
+        public PlayerLoopRunner(PlayerLoopTiming timing) {
             this.unhandledExceptionCallback = ex => Debug.LogException(ex);
             this.timing = timing;
         }
 
-        public void AddAction(IPlayerLoopItem item)
-        {
-            lock (runningAndQueueLock)
-            {
-                if (running)
-                {
+        public void AddAction(IPlayerLoopItem item) {
+            lock (runningAndQueueLock) {
+                if (running) {
                     waitQueue.Enqueue(item);
                     return;
                 }
             }
 
-            lock (arrayLock)
-            {
+            lock (arrayLock) {
                 // Ensure Capacity
-                if (loopItems.Length == tail)
-                {
+                if (loopItems.Length == tail) {
                     Array.Resize(ref loopItems, checked(tail * 2));
                 }
                 loopItems[tail++] = item;
             }
         }
 
-        public int Clear()
-        {
-            lock (arrayLock)
-            {
+        public int Clear() {
+            lock (arrayLock) {
                 var rest = 0;
 
-                for (var index = 0; index < loopItems.Length; index++)
-                {
-                    if (loopItems[index] != null)
-                    {
+                for (var index = 0; index < loopItems.Length; index++) {
+                    if (loopItems[index] != null) {
                         rest++;
                     }
 
@@ -70,12 +58,10 @@ namespace Cysharp.Threading.Tasks.Internal
         }
 
         // delegate entrypoint.
-        public void Run()
-        {
+        public void Run() {
             // for debugging, create named stacktrace.
 #if DEBUG
-            switch (timing)
-            {
+            switch (timing) {
                 case PlayerLoopTiming.Initialization:
                     Initialization();
                     break;
@@ -154,81 +140,56 @@ namespace Cysharp.Threading.Tasks.Internal
 #endif
 
         [System.Diagnostics.DebuggerHidden]
-        void RunCore()
-        {
-            lock (runningAndQueueLock)
-            {
+        void RunCore() {
+            lock (runningAndQueueLock) {
                 running = true;
             }
 
-            lock (arrayLock)
-            {
+            lock (arrayLock) {
                 var j = tail - 1;
 
-                for (int i = 0; i < loopItems.Length; i++)
-                {
+                for (int i = 0; i < loopItems.Length; i++) {
                     var action = loopItems[i];
-                    if (action != null)
-                    {
-                        try
-                        {
-                            if (!action.MoveNext())
-                            {
+                    if (action != null) {
+                        try {
+                            if (!action.MoveNext()) {
                                 loopItems[i] = null;
-                            }
-                            else
-                            {
+                            } else {
                                 continue; // next i 
                             }
-                        }
-                        catch (Exception ex)
-                        {
+                        } catch (Exception ex) {
                             loopItems[i] = null;
-                            try
-                            {
+                            try {
                                 unhandledExceptionCallback(ex);
-                            }
-                            catch { }
+                            } catch { }
                         }
                     }
 
                     // find null, loop from tail
-                    while (i < j)
-                    {
+                    while (i < j) {
                         var fromTail = loopItems[j];
-                        if (fromTail != null)
-                        {
-                            try
-                            {
-                                if (!fromTail.MoveNext())
-                                {
+                        if (fromTail != null) {
+                            try {
+                                if (!fromTail.MoveNext()) {
                                     loopItems[j] = null;
                                     j--;
                                     continue; // next j
-                                }
-                                else
-                                {
+                                } else {
                                     // swap
                                     loopItems[i] = fromTail;
                                     loopItems[j] = null;
                                     j--;
                                     goto NEXT_LOOP; // next i
                                 }
-                            }
-                            catch (Exception ex)
-                            {
+                            } catch (Exception ex) {
                                 loopItems[j] = null;
                                 j--;
-                                try
-                                {
+                                try {
                                     unhandledExceptionCallback(ex);
-                                }
-                                catch { }
+                                } catch { }
                                 continue; // next j
                             }
-                        }
-                        else
-                        {
+                        } else {
                             j--;
                         }
                     }
@@ -236,18 +197,15 @@ namespace Cysharp.Threading.Tasks.Internal
                     tail = i; // loop end
                     break; // LOOP END
 
-                    NEXT_LOOP:
+                NEXT_LOOP:
                     continue;
                 }
 
 
-                lock (runningAndQueueLock)
-                {
+                lock (runningAndQueueLock) {
                     running = false;
-                    while (waitQueue.Count != 0)
-                    {
-                        if (loopItems.Length == tail)
-                        {
+                    while (waitQueue.Count != 0) {
+                        if (loopItems.Length == tail) {
                             Array.Resize(ref loopItems, checked(tail * 2));
                         }
                         loopItems[tail++] = waitQueue.Dequeue();

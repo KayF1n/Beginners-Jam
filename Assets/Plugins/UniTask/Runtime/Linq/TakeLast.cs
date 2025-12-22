@@ -3,17 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IUniTaskAsyncEnumerable<TSource> TakeLast<TSource>(this IUniTaskAsyncEnumerable<TSource> source, Int32 count)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IUniTaskAsyncEnumerable<TSource> TakeLast<TSource>(this IUniTaskAsyncEnumerable<TSource> source, Int32 count) {
             Error.ThrowArgumentNullException(source, nameof(source));
 
             // non take.
-            if (count <= 0)
-            {
+            if (count <= 0) {
                 return Empty<TSource>();
             }
 
@@ -21,24 +17,20 @@ namespace Cysharp.Threading.Tasks.Linq
         }
     }
 
-    internal sealed class TakeLast<TSource> : IUniTaskAsyncEnumerable<TSource>
-    {
+    internal sealed class TakeLast<TSource> : IUniTaskAsyncEnumerable<TSource> {
         readonly IUniTaskAsyncEnumerable<TSource> source;
         readonly int count;
 
-        public TakeLast(IUniTaskAsyncEnumerable<TSource> source, int count)
-        {
+        public TakeLast(IUniTaskAsyncEnumerable<TSource> source, int count) {
             this.source = source;
             this.count = count;
         }
 
-        public IUniTaskAsyncEnumerator<TSource> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<TSource> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _TakeLast(source, count, cancellationToken);
         }
 
-        sealed class _TakeLast : MoveNextSource, IUniTaskAsyncEnumerator<TSource>
-        {
+        sealed class _TakeLast : MoveNextSource, IUniTaskAsyncEnumerator<TSource> {
             static readonly Action<object> MoveNextCoreDelegate = MoveNextCore;
 
             readonly IUniTaskAsyncEnumerable<TSource> source;
@@ -52,8 +44,7 @@ namespace Cysharp.Threading.Tasks.Linq
             bool iterateCompleted;
             bool continueNext;
 
-            public _TakeLast(IUniTaskAsyncEnumerable<TSource> source, int count, CancellationToken cancellationToken)
-            {
+            public _TakeLast(IUniTaskAsyncEnumerable<TSource> source, int count, CancellationToken cancellationToken) {
                 this.source = source;
                 this.count = count;
                 this.cancellationToken = cancellationToken;
@@ -62,12 +53,10 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public TSource Current { get; private set; }
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (enumerator == null)
-                {
+                if (enumerator == null) {
                     enumerator = source.GetAsyncEnumerator(cancellationToken);
                     queue = new Queue<TSource>();
                 }
@@ -77,95 +66,69 @@ namespace Cysharp.Threading.Tasks.Linq
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            void SourceMoveNext()
-            {
-                if (iterateCompleted)
-                {
-                    if (queue.Count > 0)
-                    {
+            void SourceMoveNext() {
+                if (iterateCompleted) {
+                    if (queue.Count > 0) {
                         Current = queue.Dequeue();
                         completionSource.TrySetResult(true);
-                    }
-                    else
-                    {
+                    } else {
                         completionSource.TrySetResult(false);
                     }
 
                     return;
                 }
 
-                try
-                {
-                    LOOP:
+                try {
+                LOOP:
                     awaiter = enumerator.MoveNextAsync().GetAwaiter();
-                    if (awaiter.IsCompleted)
-                    {
+                    if (awaiter.IsCompleted) {
                         continueNext = true;
                         MoveNextCore(this);
-                        if (continueNext)
-                        {
+                        if (continueNext) {
                             continueNext = false;
                             goto LOOP; // avoid recursive
                         }
-                    }
-                    else
-                    {
+                    } else {
                         awaiter.SourceOnCompleted(MoveNextCoreDelegate, this);
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                 }
             }
 
 
-            static void MoveNextCore(object state)
-            {
+            static void MoveNextCore(object state) {
                 var self = (_TakeLast)state;
 
-                if (self.TryGetResult(self.awaiter, out var result))
-                {
-                    if (result)
-                    {
-                        if (self.queue.Count < self.count)
-                        {
+                if (self.TryGetResult(self.awaiter, out var result)) {
+                    if (result) {
+                        if (self.queue.Count < self.count) {
                             self.queue.Enqueue(self.enumerator.Current);
 
-                            if (!self.continueNext)
-                            {
+                            if (!self.continueNext) {
                                 self.SourceMoveNext();
                             }
-                        }
-                        else
-                        {
+                        } else {
                             self.queue.Dequeue();
                             self.queue.Enqueue(self.enumerator.Current);
 
-                            if (!self.continueNext)
-                            {
+                            if (!self.continueNext) {
                                 self.SourceMoveNext();
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         self.continueNext = false;
                         self.iterateCompleted = true;
                         self.SourceMoveNext();
                     }
-                }
-                else
-                {
+                } else {
                     self.continueNext = false;
                 }
             }
 
-            public UniTask DisposeAsync()
-            {
+            public UniTask DisposeAsync() {
                 TaskTracker.RemoveTracking(this);
-                if (enumerator != null)
-                {
+                if (enumerator != null) {
                     return enumerator.DisposeAsync();
                 }
                 return default;

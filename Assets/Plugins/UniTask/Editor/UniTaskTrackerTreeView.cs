@@ -1,20 +1,16 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-using UnityEngine;
-using UnityEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System;
-using UnityEditor.IMGUI.Controls;
-using Cysharp.Threading.Tasks.Internal;
 using System.Text;
 using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEditor.IMGUI.Controls;
+using UnityEngine;
 
-namespace Cysharp.Threading.Tasks.Editor
-{
-    public class UniTaskTrackerViewItem : TreeViewItem
-    {
+namespace Cysharp.Threading.Tasks.Editor {
+    public class UniTaskTrackerViewItem : TreeViewItem {
         static Regex removeHref = new Regex("<a href.+>(.+)</a>", RegexOptions.Compiled);
 
         public string TaskType { get; set; }
@@ -22,11 +18,9 @@ namespace Cysharp.Threading.Tasks.Editor
         public string Status { get; set; }
 
         string position;
-        public string Position
-        {
+        public string Position {
             get { return position; }
-            set
-            {
+            set {
                 position = value;
                 PositionFirstLine = GetFirstLine(position);
             }
@@ -34,13 +28,10 @@ namespace Cysharp.Threading.Tasks.Editor
 
         public string PositionFirstLine { get; private set; }
 
-        static string GetFirstLine(string str)
-        {
+        static string GetFirstLine(string str) {
             var sb = new StringBuilder();
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (str[i] == '\r' || str[i] == '\n')
-                {
+            for (int i = 0; i < str.Length; i++) {
+                if (str[i] == '\r' || str[i] == '\n') {
                     break;
                 }
                 sb.Append(str[i]);
@@ -49,14 +40,12 @@ namespace Cysharp.Threading.Tasks.Editor
             return removeHref.Replace(sb.ToString(), "$1");
         }
 
-        public UniTaskTrackerViewItem(int id) : base(id)
-        {
+        public UniTaskTrackerViewItem(int id) : base(id) {
 
         }
     }
 
-    public class UniTaskTrackerTreeView : TreeView
-    {
+    public class UniTaskTrackerTreeView : TreeView {
         const string sortedColumnIndexStateKey = "UniTaskTrackerTreeView_sortedColumnIndex";
 
         public IReadOnlyList<TreeViewItem> CurrentBindingItems;
@@ -68,13 +57,11 @@ namespace Cysharp.Threading.Tasks.Editor
                 new MultiColumnHeaderState.Column() { headerContent = new GUIContent("Elapsed"), width = 10},
                 new MultiColumnHeaderState.Column() { headerContent = new GUIContent("Status"), width = 10},
                 new MultiColumnHeaderState.Column() { headerContent = new GUIContent("Position")},
-            })))
-        {
+            }))) {
         }
 
         UniTaskTrackerTreeView(TreeViewState state, MultiColumnHeader header)
-            : base(state, header)
-        {
+            : base(state, header) {
             rowHeight = 20;
             showAlternatingRowBackgrounds = true;
             showBorder = true;
@@ -86,16 +73,14 @@ namespace Cysharp.Threading.Tasks.Editor
             header.sortedColumnIndex = SessionState.GetInt(sortedColumnIndexStateKey, 1);
         }
 
-        public void ReloadAndSort()
-        {
+        public void ReloadAndSort() {
             var currentSelected = this.state.selectedIDs;
             Reload();
             Header_sortingChanged(this.multiColumnHeader);
             this.state.selectedIDs = currentSelected;
         }
 
-        private void Header_sortingChanged(MultiColumnHeader multiColumnHeader)
-        {
+        private void Header_sortingChanged(MultiColumnHeader multiColumnHeader) {
             SessionState.SetInt(sortedColumnIndexStateKey, multiColumnHeader.sortedColumnIndex);
             var index = multiColumnHeader.sortedColumnIndex;
             var ascending = multiColumnHeader.IsSortedAscending(multiColumnHeader.sortedColumnIndex);
@@ -103,8 +88,7 @@ namespace Cysharp.Threading.Tasks.Editor
             var items = rootItem.children.Cast<UniTaskTrackerViewItem>();
 
             IOrderedEnumerable<UniTaskTrackerViewItem> orderedEnumerable;
-            switch (index)
-            {
+            switch (index) {
                 case 0:
                     orderedEnumerable = ascending ? items.OrderBy(item => item.TaskType) : items.OrderByDescending(item => item.TaskType);
                     break;
@@ -125,14 +109,12 @@ namespace Cysharp.Threading.Tasks.Editor
             BuildRows(rootItem);
         }
 
-        protected override TreeViewItem BuildRoot()
-        {
+        protected override TreeViewItem BuildRoot() {
             var root = new TreeViewItem { depth = -1 };
 
             var children = new List<TreeViewItem>();
 
-            TaskTracker.ForEachActiveTask((trackingId, awaiterType, status, created, stackTrace) =>
-            {
+            TaskTracker.ForEachActiveTask((trackingId, awaiterType, status, created, stackTrace) => {
                 children.Add(new UniTaskTrackerViewItem(trackingId) { TaskType = awaiterType, Status = status.ToString(), Elapsed = (DateTime.UtcNow - created).TotalSeconds.ToString("00.00"), Position = stackTrace });
             });
 
@@ -141,24 +123,20 @@ namespace Cysharp.Threading.Tasks.Editor
             return root;
         }
 
-        protected override bool CanMultiSelect(TreeViewItem item)
-        {
+        protected override bool CanMultiSelect(TreeViewItem item) {
             return false;
         }
 
-        protected override void RowGUI(RowGUIArgs args)
-        {
+        protected override void RowGUI(RowGUIArgs args) {
             var item = args.item as UniTaskTrackerViewItem;
 
-            for (var visibleColumnIndex = 0; visibleColumnIndex < args.GetNumVisibleColumns(); visibleColumnIndex++)
-            {
+            for (var visibleColumnIndex = 0; visibleColumnIndex < args.GetNumVisibleColumns(); visibleColumnIndex++) {
                 var rect = args.GetCellRect(visibleColumnIndex);
                 var columnIndex = args.GetColumn(visibleColumnIndex);
 
                 var labelStyle = args.selected ? EditorStyles.whiteLabel : EditorStyles.label;
                 labelStyle.alignment = TextAnchor.MiddleLeft;
-                switch (columnIndex)
-                {
+                switch (columnIndex) {
                     case 0:
                         EditorGUI.LabelField(rect, item.TaskType, labelStyle);
                         break;
