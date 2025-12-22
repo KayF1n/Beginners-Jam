@@ -10,20 +10,33 @@ public class GameInstaller : MonoInstaller {
         .AsSingle()
         .NonLazy();
 
-        //Services
-        Container.Bind<IDataSerializer>().To<JsonSerializer>().AsSingle();
-        Container.Bind<ISaveStorage>().To<PlayerPrefsStorage>().AsSingle();
-        Container.Bind<ISaveLoadService>().To<SaveLoadService>().AsSingle();
-
-        Container.Bind<IAudioService>().To<FmodAudioService>().AsSingle();
+        BindSavings();
 
         StateMachineInstall();
 
-
-        Container.Bind<IRandomService>().To<RandomService>().AsSingle().WithArguments(_randomServiceSettings);
+        Container.Bind<IDataSerializer>().To<JsonSerializer>().AsSingle();
 
         Container.Bind<IGameManager>().To<GameManager>().AsSingle();
+
+        //Services
+        Container.Bind<IAudioService>().To<FmodAudioService>().AsSingle();
+        Container.Bind<IRandomService>().To<RandomService>().AsSingle().WithArguments(_randomServiceSettings);
+
         Container.Bind<IUiService>().To<UiService>().AsSingle();
+        Container.Bind<ILevelProgressService>().To<LevelProgressService>().AsSingle();
+        Container.Bind<ISceneLoader>().To<SceneLoader>().AsSingle();
+        Container.Bind<ILoadingScreenService>().To<LoadingScreenService>().AsSingle();
+
+        //Systems
+
+        Container.Bind<LevelProgressSystem>().AsSingle().NonLazy();
+        Container.Bind<AudioSystem>().AsSingle().NonLazy();
+    }
+
+
+    private void BindSavings() {
+        Container.Bind<ISaveStorage>().To<PlayerPrefsStorage>().AsSingle();
+        Container.Bind<ISaveLoadService>().To<SaveLoadService>().AsSingle();
     }
 
     private void StateMachineInstall() {
@@ -32,6 +45,7 @@ public class GameInstaller : MonoInstaller {
         Container.Bind<IStateFactory>().To<StateFactory>().AsSingle();
 
         Container.Bind<BootstrapState>().AsSingle();
+        Container.Bind<LoadingLevelState>().AsSingle();
         Container.Bind<GameLoopState>().AsSingle();
         Container.Bind<ExitState>().AsSingle();
     }

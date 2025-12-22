@@ -7,7 +7,7 @@ public class MainMenuController : MonoBehaviour {
     [SerializeField] UIPanel settingsPanel;
 
     public void StartGame() {
-        gameManager.StartGame();
+        gameManager.StartNewGame();
     }
 
     public void ToggleSettings() {

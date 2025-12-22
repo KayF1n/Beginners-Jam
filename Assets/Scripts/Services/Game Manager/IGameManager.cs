@@ -1,5 +1,5 @@
 public interface IGameManager {
     void ExitGame();
-    void StartGame();
+    void StartNewGame();
 }
 

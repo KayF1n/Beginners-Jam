@@ -475,7 +475,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 447055843}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1611637459}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &447055843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -661,7 +673,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 938415232}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1611637459}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: ToggleSettings
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &938415232
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1560,6 +1584,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3500622090163810139, guid: 85ef514e381ebf84b8b7704ab8b52515, type: 3}
   m_PrefabInstance: {fileID: 1290718095}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1290718098 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6916693367261824383, guid: 85ef514e381ebf84b8b7704ab8b52515, type: 3}
+  m_PrefabInstance: {fileID: 1290718095}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe3f9d24a69e3854ab3b29bba136b8db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanel
 --- !u!1 &1611637457
 GameObject:
   m_ObjectHideFlags: 0
@@ -1569,6 +1604,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1611637458}
+  - component: {fileID: 1611637459}
   m_Layer: 5
   m_Name: MainMenu
   m_TagString: Untagged
@@ -1597,6 +1633,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1611637459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611637457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27b7090d617b82e4fb112fcafa9b14e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenu
+  settingsPanel: {fileID: 1290718098}
 --- !u!1 &1748373943
 GameObject:
   m_ObjectHideFlags: 0
@@ -1712,7 +1761,6 @@ GameObject:
   - component: {fileID: 1754602385}
   - component: {fileID: 1754602387}
   - component: {fileID: 1754602386}
-  - component: {fileID: 1754602388}
   m_Layer: 5
   m_Name: BG
   m_TagString: Untagged
@@ -1777,19 +1825,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1754602384}
   m_CullTransparentMesh: 1
---- !u!114 &1754602388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1754602384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27b7090d617b82e4fb112fcafa9b14e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MainMenu
-  settingsPanel: {fileID: 0}
 --- !u!1 &1771391678
 GameObject:
   m_ObjectHideFlags: 0
@@ -2015,7 +2050,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1884787815}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1611637459}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: ExitGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1884787815
 MonoBehaviour:
   m_ObjectHideFlags: 0
