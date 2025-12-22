@@ -1,12 +1,12 @@
-public class AudioServiceSaveAdapter : ISaveable<AudioSettings> {
+public class AudioSystem : SaveableSystem<AudioSettings> {
     private readonly IAudioService _audioService;
-    public string SaveKey => "audio_settings";
+    public override string SaveKey => "audio_settings";
 
-    public AudioServiceSaveAdapter(IAudioService audioService) {
+    public AudioSystem(IAudioService audioService, ISaveLoadService saveLoadService) : base(saveLoadService) {
         _audioService = audioService;
     }
 
-    public AudioSettings CaptureState() {
+    public override AudioSettings CaptureState() {
         var settings = new AudioSettings();
         foreach (var channelType in _audioService.GetSupportedChannelsTypes()) {
             settings.channels.Add(new AudioChannel {
@@ -17,7 +17,7 @@ public class AudioServiceSaveAdapter : ISaveable<AudioSettings> {
         return settings;
     }
 
-    public void ApplyState(AudioSettings state) {
+    public override void ApplyState(AudioSettings state) {
         foreach (var channel in state.channels) {
             _audioService.SetVolume(channel.ChannelType, channel.Volume);
         }
