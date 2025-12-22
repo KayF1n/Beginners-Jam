@@ -4,10 +4,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-namespace Cysharp.Threading.Tasks
-{
-    public class UnityWebRequestException : Exception
-    {
+namespace Cysharp.Threading.Tasks {
+    public class UnityWebRequestException : Exception {
         public UnityWebRequest UnityWebRequest { get; }
 #if UNITY_2020_2_OR_NEWER
         public UnityWebRequest.Result Result { get; }
@@ -22,8 +20,7 @@ namespace Cysharp.Threading.Tasks
 
         string msg;
 
-        public UnityWebRequestException(UnityWebRequest unityWebRequest)
-        {
+        public UnityWebRequestException(UnityWebRequest unityWebRequest) {
             this.UnityWebRequest = unityWebRequest;
 #if UNITY_2020_2_OR_NEWER
             this.Result = unityWebRequest.result;
@@ -33,28 +30,20 @@ namespace Cysharp.Threading.Tasks
 #endif
             this.Error = unityWebRequest.error;
             this.ResponseCode = unityWebRequest.responseCode;
-            if (UnityWebRequest.downloadHandler != null)
-            {
-                if (unityWebRequest.downloadHandler is DownloadHandlerBuffer dhb)
-                {
+            if (UnityWebRequest.downloadHandler != null) {
+                if (unityWebRequest.downloadHandler is DownloadHandlerBuffer dhb) {
                     this.Text = dhb.text;
                 }
             }
             this.ResponseHeaders = unityWebRequest.GetResponseHeaders();
         }
 
-        public override string Message
-        {
-            get
-            {
-                if (msg == null)
-                {
-                    if(!string.IsNullOrWhiteSpace(Text))
-                    {
+        public override string Message {
+            get {
+                if (msg == null) {
+                    if (!string.IsNullOrWhiteSpace(Text)) {
                         msg = Error + Environment.NewLine + Text;
-                    }
-                    else
-                    {
+                    } else {
                         msg = Error;
                     }
                 }

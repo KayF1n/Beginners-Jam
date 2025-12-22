@@ -12,12 +12,9 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using UnityEngine;
 
-namespace Cysharp.Threading.Tasks.Internal
-{
-    internal static class DiagnosticsExtensions
-    {
+namespace Cysharp.Threading.Tasks.Internal {
+    internal static class DiagnosticsExtensions {
         static bool displayFilenames = true;
 
         static readonly Regex typeBeautifyRegex = new Regex("`.+$", RegexOptions.Compiled);
@@ -45,43 +42,36 @@ namespace Cysharp.Threading.Tasks.Internal
             { typeof(UniTaskVoid), "UniTaskVoid" }
         };
 
-        public static string CleanupAsyncStackTrace(this StackTrace stackTrace)
-        {
+        public static string CleanupAsyncStackTrace(this StackTrace stackTrace) {
             if (stackTrace == null) return "";
 
             var sb = new StringBuilder();
-            for (int i = 0; i < stackTrace.FrameCount; i++)
-            {
+            for (int i = 0; i < stackTrace.FrameCount; i++) {
                 var sf = stackTrace.GetFrame(i);
 
                 var mb = sf.GetMethod();
 
                 if (IgnoreLine(mb)) continue;
-                if (IsAsync(mb))
-                {
+                if (IsAsync(mb)) {
                     sb.Append("async ");
                     TryResolveStateMachineMethod(ref mb, out var decType);
                 }
 
                 // return type
-                if (mb is MethodInfo mi)
-                {
+                if (mb is MethodInfo mi) {
                     sb.Append(BeautifyType(mi.ReturnType, false));
                     sb.Append(" ");
                 }
 
                 // method name
                 sb.Append(BeautifyType(mb.DeclaringType, false));
-                if (!mb.IsConstructor)
-                {
+                if (!mb.IsConstructor) {
                     sb.Append(".");
                 }
                 sb.Append(mb.Name);
-                if (mb.IsGenericMethod)
-                {
+                if (mb.IsGenericMethod) {
                     sb.Append("<");
-                    foreach (var item in mb.GetGenericArguments())
-                    {
+                    foreach (var item in mb.GetGenericArguments()) {
                         sb.Append(BeautifyType(item, true));
                     }
                     sb.Append(">");
@@ -93,25 +83,18 @@ namespace Cysharp.Threading.Tasks.Internal
                 sb.Append(")");
 
                 // file name
-                if (displayFilenames && (sf.GetILOffset() != -1))
-                {
+                if (displayFilenames && (sf.GetILOffset() != -1)) {
                     String fileName = null;
 
-                    try
-                    {
+                    try {
                         fileName = sf.GetFileName();
-                    }
-                    catch (NotSupportedException)
-                    {
+                    } catch (NotSupportedException) {
                         displayFilenames = false;
-                    }
-                    catch (SecurityException)
-                    {
+                    } catch (SecurityException) {
                         displayFilenames = false;
                     }
 
-                    if (fileName != null)
-                    {
+                    if (fileName != null) {
                         sb.Append(' ');
                         sb.AppendFormat(CultureInfo.InvariantCulture, "(at {0})", AppendHyperLink(fileName, sf.GetFileLineNumber().ToString()));
                     }
@@ -123,41 +106,33 @@ namespace Cysharp.Threading.Tasks.Internal
         }
 
 
-        static bool IsAsync(MethodBase methodInfo)
-        {
+        static bool IsAsync(MethodBase methodInfo) {
             var declareType = methodInfo.DeclaringType;
             return typeof(IAsyncStateMachine).IsAssignableFrom(declareType);
         }
 
         // code from Ben.Demystifier/EnhancedStackTrace.Frame.cs
-        static bool TryResolveStateMachineMethod(ref MethodBase method, out Type declaringType)
-        {
+        static bool TryResolveStateMachineMethod(ref MethodBase method, out Type declaringType) {
             declaringType = method.DeclaringType;
 
             var parentType = declaringType.DeclaringType;
-            if (parentType == null)
-            {
+            if (parentType == null) {
                 return false;
             }
 
             var methods = parentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            if (methods == null)
-            {
+            if (methods == null) {
                 return false;
             }
 
-            foreach (var candidateMethod in methods)
-            {
+            foreach (var candidateMethod in methods) {
                 var attributes = candidateMethod.GetCustomAttributes<StateMachineAttribute>(false);
-                if (attributes == null)
-                {
+                if (attributes == null) {
                     continue;
                 }
 
-                foreach (var asma in attributes)
-                {
-                    if (asma.StateMachineType == declaringType)
-                    {
+                foreach (var asma in attributes) {
+                    if (asma.StateMachineType == declaringType) {
                         method = candidateMethod;
                         declaringType = candidateMethod.DeclaringType;
                         // Mark the iterator as changed; so it gets the + annotation of the original method
@@ -170,16 +145,13 @@ namespace Cysharp.Threading.Tasks.Internal
             return false;
         }
 
-        static string BeautifyType(Type t, bool shortName)
-        {
-            if (builtInTypeNames.TryGetValue(t, out var builtin))
-            {
+        static string BeautifyType(Type t, bool shortName) {
+            if (builtInTypeNames.TryGetValue(t, out var builtin)) {
                 return builtin;
             }
             if (t.IsGenericParameter) return t.Name;
             if (t.IsArray) return BeautifyType(t.GetElementType(), shortName) + "[]";
-            if (t.FullName?.StartsWith("System.ValueTuple") ?? false)
-            {
+            if (t.FullName?.StartsWith("System.ValueTuple") ?? false) {
                 return "(" + string.Join(", ", t.GetGenericArguments().Select(x => BeautifyType(x, true))) + ")";
             }
             if (!t.IsGenericType) return shortName ? t.Name : t.FullName.Replace("Cysharp.Threading.Tasks.Triggers.", "").Replace("Cysharp.Threading.Tasks.Internal.", "").Replace("Cysharp.Threading.Tasks.", "") ?? t.Name;
@@ -187,58 +159,39 @@ namespace Cysharp.Threading.Tasks.Internal
             var innerFormat = string.Join(", ", t.GetGenericArguments().Select(x => BeautifyType(x, true)));
 
             var genericType = t.GetGenericTypeDefinition().FullName;
-            if (genericType == "System.Threading.Tasks.Task`1")
-            {
+            if (genericType == "System.Threading.Tasks.Task`1") {
                 genericType = "Task";
             }
 
             return typeBeautifyRegex.Replace(genericType, "").Replace("Cysharp.Threading.Tasks.Triggers.", "").Replace("Cysharp.Threading.Tasks.Internal.", "").Replace("Cysharp.Threading.Tasks.", "") + "<" + innerFormat + ">";
         }
 
-        static bool IgnoreLine(MethodBase methodInfo)
-        {
+        static bool IgnoreLine(MethodBase methodInfo) {
             var declareType = methodInfo.DeclaringType.FullName;
-            if (declareType == "System.Threading.ExecutionContext")
-            {
+            if (declareType == "System.Threading.ExecutionContext") {
                 return true;
-            }
-            else if (declareType.StartsWith("System.Runtime.CompilerServices"))
-            {
+            } else if (declareType.StartsWith("System.Runtime.CompilerServices")) {
                 return true;
-            }
-            else if (declareType.StartsWith("Cysharp.Threading.Tasks.CompilerServices"))
-            {
+            } else if (declareType.StartsWith("Cysharp.Threading.Tasks.CompilerServices")) {
                 return true;
-            }
-            else if (declareType == "System.Threading.Tasks.AwaitTaskContinuation")
-            {
+            } else if (declareType == "System.Threading.Tasks.AwaitTaskContinuation") {
                 return true;
-            }
-            else if (declareType.StartsWith("System.Threading.Tasks.Task"))
-            {
+            } else if (declareType.StartsWith("System.Threading.Tasks.Task")) {
                 return true;
-            }
-            else if (declareType.StartsWith("Cysharp.Threading.Tasks.UniTaskCompletionSourceCore"))
-            {
+            } else if (declareType.StartsWith("Cysharp.Threading.Tasks.UniTaskCompletionSourceCore")) {
                 return true;
-            }
-            else if (declareType.StartsWith("Cysharp.Threading.Tasks.AwaiterActions"))
-            {
+            } else if (declareType.StartsWith("Cysharp.Threading.Tasks.AwaiterActions")) {
                 return true;
             }
 
             return false;
         }
 
-        static string AppendHyperLink(string path, string line)
-        {
+        static string AppendHyperLink(string path, string line) {
             var fi = new FileInfo(path);
-            if (fi.Directory == null)
-            {
+            if (fi.Directory == null) {
                 return fi.Name;
-            }
-            else
-            {
+            } else {
                 var fname = fi.FullName.Replace(Path.DirectorySeparatorChar, '/').Replace(PlayerLoopHelper.ApplicationDataPath, "");
                 var withAssetsPath = "Assets/" + fname;
                 return "<a href=\"" + withAssetsPath + "\" line=\"" + line + "\">" + withAssetsPath + ":" + line + "</a>";

@@ -1,27 +1,19 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System;
-using UnityEditor.IMGUI.Controls;
-using Cysharp.Threading.Tasks.Internal;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
-namespace Cysharp.Threading.Tasks.Editor
-{
-    public class UniTaskTrackerWindow : EditorWindow
-    {
+namespace Cysharp.Threading.Tasks.Editor {
+    public class UniTaskTrackerWindow : EditorWindow {
         static int interval;
 
         static UniTaskTrackerWindow window;
 
         [MenuItem("Window/UniTask Tracker")]
-        public static void OpenWindow()
-        {
-            if (window != null)
-            {
+        public static void OpenWindow() {
+            if (window != null) {
                 window.Close();
             }
 
@@ -34,8 +26,7 @@ namespace Cysharp.Threading.Tasks.Editor
         UniTaskTrackerTreeView treeView;
         object splitterState;
 
-        void OnEnable()
-        {
+        void OnEnable() {
             window = this; // set singleton.
             splitterState = SplitterGUILayout.CreateSplitterState(new float[] { 75f, 25f }, new int[] { 32, 32 }, null);
             treeView = new UniTaskTrackerTreeView();
@@ -44,8 +35,7 @@ namespace Cysharp.Threading.Tasks.Editor
             TaskTracker.EditorEnableState.EnableStackTrace = EditorPrefs.GetBool(TaskTracker.EnableStackTraceKey, false);
         }
 
-        void OnGUI()
-        {
+        void OnGUI() {
             // Head
             RenderHeadPanel();
 
@@ -73,37 +63,31 @@ namespace Cysharp.Threading.Tasks.Editor
         static readonly GUIContent EnableStackTraceHeadContent = EditorGUIUtility.TrTextContent("Enable StackTrace", "Capture StackTrace when task is started. Performance impact: high", (Texture)null);
 
         // [Enable Tracking] | [Enable StackTrace]
-        void RenderHeadPanel()
-        {
+        void RenderHeadPanel() {
             EditorGUILayout.BeginVertical(EmptyLayoutOption);
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar, EmptyLayoutOption);
 
-            if (GUILayout.Toggle(EnableAutoReload, EnableAutoReloadHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption) != EnableAutoReload)
-            {
+            if (GUILayout.Toggle(EnableAutoReload, EnableAutoReloadHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption) != EnableAutoReload) {
                 TaskTracker.EditorEnableState.EnableAutoReload = !EnableAutoReload;
             }
 
-            if (GUILayout.Toggle(EnableTracking, EnableTrackingHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption) != EnableTracking)
-            {
+            if (GUILayout.Toggle(EnableTracking, EnableTrackingHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption) != EnableTracking) {
                 TaskTracker.EditorEnableState.EnableTracking = !EnableTracking;
             }
 
-            if (GUILayout.Toggle(EnableStackTrace, EnableStackTraceHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption) != EnableStackTrace)
-            {
+            if (GUILayout.Toggle(EnableStackTrace, EnableStackTraceHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption) != EnableStackTrace) {
                 TaskTracker.EditorEnableState.EnableStackTrace = !EnableStackTrace;
             }
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(ReloadHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption))
-            {
+            if (GUILayout.Button(ReloadHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption)) {
                 TaskTracker.CheckAndResetDirty();
                 treeView.ReloadAndSort();
                 Repaint();
             }
 
-            if (GUILayout.Button(GCHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption))
-            {
+            if (GUILayout.Button(GCHeadContent, EditorStyles.toolbarButton, EmptyLayoutOption)) {
                 GC.Collect(0);
             }
 
@@ -118,10 +102,8 @@ namespace Cysharp.Threading.Tasks.Editor
         Vector2 tableScroll;
         GUIStyle tableListStyle;
 
-        void RenderTable()
-        {
-            if (tableListStyle == null)
-            {
+        void RenderTable() {
+            if (tableListStyle == null) {
                 tableListStyle = new GUIStyle("CN Box");
                 tableListStyle.margin.top = 0;
                 tableListStyle.padding.left = 3;
@@ -147,14 +129,10 @@ namespace Cysharp.Threading.Tasks.Editor
             EditorGUILayout.EndVertical();
         }
 
-        private void Update()
-        {
-            if (EnableAutoReload)
-            {
-                if (interval++ % 120 == 0)
-                {
-                    if (TaskTracker.CheckAndResetDirty())
-                    {
+        private void Update() {
+            if (EnableAutoReload) {
+                if (interval++ % 120 == 0) {
+                    if (TaskTracker.CheckAndResetDirty()) {
                         treeView.ReloadAndSort();
                         Repaint();
                     }
@@ -169,10 +147,8 @@ namespace Cysharp.Threading.Tasks.Editor
         static GUIStyle detailsStyle;
         Vector2 detailsScroll;
 
-        void RenderDetailsPanel()
-        {
-            if (detailsStyle == null)
-            {
+        void RenderDetailsPanel() {
+            if (detailsStyle == null) {
                 detailsStyle = new GUIStyle("CN Message");
                 detailsStyle.wordWrap = false;
                 detailsStyle.stretchHeight = true;
@@ -181,12 +157,10 @@ namespace Cysharp.Threading.Tasks.Editor
 
             string message = "";
             var selected = treeView.state.selectedIDs;
-            if (selected.Count > 0)
-            {
+            if (selected.Count > 0) {
                 var first = selected[0];
                 var item = treeView.CurrentBindingItems.FirstOrDefault(x => x.id == first) as UniTaskTrackerViewItem;
-                if (item != null)
-                {
+                if (item != null) {
                     message = item.Position;
                 }
             }

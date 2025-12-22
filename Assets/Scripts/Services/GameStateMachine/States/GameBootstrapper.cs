@@ -3,7 +3,7 @@ using Zenject;
 
 public class GameBootstrapper : MonoBehaviour {
     [Inject] private IStateMachine stateMachine;
-    
+
     private void Start() {
         stateMachine.ChangeState<BootstrapState>();
     }

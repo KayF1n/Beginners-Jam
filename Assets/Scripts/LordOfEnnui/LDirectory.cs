@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class LDirectory : MonoBehaviour
-{
+public class LDirectory : MonoBehaviour {
     public static LDirectory Instance;
 
     public GameObject player;
@@ -11,7 +10,7 @@ public class LDirectory : MonoBehaviour
     private void Awake() {
         if (Instance == null) {
             Instance = this;
-        }else {
+        } else {
             Destroy(Instance);
         }
     }

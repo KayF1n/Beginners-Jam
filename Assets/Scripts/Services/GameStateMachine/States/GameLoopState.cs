@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class GameLoopState : State {
     public GameLoopState(IStateMachine stateMachine) : base(stateMachine) {
     }

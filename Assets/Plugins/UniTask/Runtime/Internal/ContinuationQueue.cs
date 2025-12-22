@@ -3,10 +3,8 @@
 using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Internal
-{
-    internal sealed class ContinuationQueue
-    {
+namespace Cysharp.Threading.Tasks.Internal {
+    internal sealed class ContinuationQueue {
         const int MaxArrayLength = 0X7FEFFFFF;
         const int InitialSize = 16;
 
@@ -21,23 +19,18 @@ namespace Cysharp.Threading.Tasks.Internal
         int waitingListCount = 0;
         Action[] waitingList = new Action[InitialSize];
 
-        public ContinuationQueue(PlayerLoopTiming timing)
-        {
+        public ContinuationQueue(PlayerLoopTiming timing) {
             this.timing = timing;
         }
 
-        public void Enqueue(Action continuation)
-        {
+        public void Enqueue(Action continuation) {
             bool lockTaken = false;
-            try
-            {
+            try {
                 gate.Enter(ref lockTaken);
 
-                if (dequing)
-                {
+                if (dequing) {
                     // Ensure Capacity
-                    if (waitingList.Length == waitingListCount)
-                    {
+                    if (waitingList.Length == waitingListCount) {
                         var newLength = waitingListCount * 2;
                         if ((uint)newLength > MaxArrayLength) newLength = MaxArrayLength;
 
@@ -47,12 +40,9 @@ namespace Cysharp.Threading.Tasks.Internal
                     }
                     waitingList[waitingListCount] = continuation;
                     waitingListCount++;
-                }
-                else
-                {
+                } else {
                     // Ensure Capacity
-                    if (actionList.Length == actionListCount)
-                    {
+                    if (actionList.Length == actionListCount) {
                         var newLength = actionListCount * 2;
                         if ((uint)newLength > MaxArrayLength) newLength = MaxArrayLength;
 
@@ -63,15 +53,12 @@ namespace Cysharp.Threading.Tasks.Internal
                     actionList[actionListCount] = continuation;
                     actionListCount++;
                 }
-            }
-            finally
-            {
+            } finally {
                 if (lockTaken) gate.Exit(false);
             }
         }
 
-        public int Clear()
-        {
+        public int Clear() {
             var rest = actionListCount + waitingListCount;
 
             actionListCount = 0;
@@ -84,12 +71,10 @@ namespace Cysharp.Threading.Tasks.Internal
         }
 
         // delegate entrypoint.
-        public void Run()
-        {
+        public void Run() {
             // for debugging, create named stacktrace.
 #if DEBUG
-            switch (timing)
-            {
+            switch (timing) {
                 case PlayerLoopTiming.Initialization:
                     Initialization();
                     break;
@@ -168,41 +153,32 @@ namespace Cysharp.Threading.Tasks.Internal
 #endif
 
         [System.Diagnostics.DebuggerHidden]
-        void RunCore()
-        {
+        void RunCore() {
             {
                 bool lockTaken = false;
-                try
-                {
+                try {
                     gate.Enter(ref lockTaken);
                     if (actionListCount == 0) return;
                     dequing = true;
-                }
-                finally
-                {
+                } finally {
                     if (lockTaken) gate.Exit(false);
                 }
             }
 
-            for (int i = 0; i < actionListCount; i++)
-            {
+            for (int i = 0; i < actionListCount; i++) {
 
                 var action = actionList[i];
                 actionList[i] = null;
-                try
-                {
+                try {
                     action();
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     UnityEngine.Debug.LogException(ex);
                 }
             }
 
             {
                 bool lockTaken = false;
-                try
-                {
+                try {
                     gate.Enter(ref lockTaken);
                     dequing = false;
 
@@ -213,9 +189,7 @@ namespace Cysharp.Threading.Tasks.Internal
 
                     waitingListCount = 0;
                     waitingList = swapTempActionList;
-                }
-                finally
-                {
+                } finally {
                     if (lockTaken) gate.Exit(false);
                 }
             }

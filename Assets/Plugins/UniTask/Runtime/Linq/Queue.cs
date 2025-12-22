@@ -1,32 +1,25 @@
 ﻿using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IUniTaskAsyncEnumerable<TSource> Queue<TSource>(this IUniTaskAsyncEnumerable<TSource> source)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IUniTaskAsyncEnumerable<TSource> Queue<TSource>(this IUniTaskAsyncEnumerable<TSource> source) {
             return new QueueOperator<TSource>(source);
         }
     }
 
-    internal sealed class QueueOperator<TSource> : IUniTaskAsyncEnumerable<TSource>
-    {
+    internal sealed class QueueOperator<TSource> : IUniTaskAsyncEnumerable<TSource> {
         readonly IUniTaskAsyncEnumerable<TSource> source;
 
-        public QueueOperator(IUniTaskAsyncEnumerable<TSource> source)
-        {
+        public QueueOperator(IUniTaskAsyncEnumerable<TSource> source) {
             this.source = source;
         }
 
-        public IUniTaskAsyncEnumerator<TSource> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<TSource> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _Queue(source, cancellationToken);
         }
 
-        sealed class _Queue : IUniTaskAsyncEnumerator<TSource>
-        {
+        sealed class _Queue : IUniTaskAsyncEnumerator<TSource> {
             readonly IUniTaskAsyncEnumerable<TSource> source;
             CancellationToken cancellationToken;
 
@@ -35,20 +28,17 @@ namespace Cysharp.Threading.Tasks.Linq
             IUniTaskAsyncEnumerator<TSource> sourceEnumerator;
             bool channelClosed;
 
-            public _Queue(IUniTaskAsyncEnumerable<TSource> source, CancellationToken cancellationToken)
-            {
+            public _Queue(IUniTaskAsyncEnumerable<TSource> source, CancellationToken cancellationToken) {
                 this.source = source;
                 this.cancellationToken = cancellationToken;
             }
 
             public TSource Current => channelEnumerator.Current;
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (sourceEnumerator == null)
-                {
+                if (sourceEnumerator == null) {
                     sourceEnumerator = source.GetAsyncEnumerator(cancellationToken);
                     channel = Channel.CreateSingleConsumerUnbounded<TSource>();
 
@@ -60,40 +50,29 @@ namespace Cysharp.Threading.Tasks.Linq
                 return channelEnumerator.MoveNextAsync();
             }
 
-            static async UniTaskVoid ConsumeAll(_Queue self, IUniTaskAsyncEnumerator<TSource> enumerator, ChannelWriter<TSource> writer)
-            {
-                try
-                {
-                    while (await enumerator.MoveNextAsync())
-                    {
+            static async UniTaskVoid ConsumeAll(_Queue self, IUniTaskAsyncEnumerator<TSource> enumerator, ChannelWriter<TSource> writer) {
+                try {
+                    while (await enumerator.MoveNextAsync()) {
                         writer.TryWrite(enumerator.Current);
                     }
                     writer.TryComplete();
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     writer.TryComplete(ex);
-                }
-                finally
-                {
+                } finally {
                     self.channelClosed = true;
                     await enumerator.DisposeAsync();
                 }
             }
 
-            public async UniTask DisposeAsync()
-            {
-                if (sourceEnumerator != null)
-                {
+            public async UniTask DisposeAsync() {
+                if (sourceEnumerator != null) {
                     await sourceEnumerator.DisposeAsync();
                 }
-                if (channelEnumerator != null)
-                {
+                if (channelEnumerator != null) {
                     await channelEnumerator.DisposeAsync();
                 }
 
-                if (!channelClosed)
-                {
+                if (!channelClosed) {
                     channelClosed = true;
                     channel.Writer.TryComplete(new OperationCanceledException());
                 }

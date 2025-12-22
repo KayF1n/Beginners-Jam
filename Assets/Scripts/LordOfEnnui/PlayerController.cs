@@ -2,8 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
-{
+public class PlayerController : MonoBehaviour {
     GameObject pCamera;
     InputAction moveAction, jumpAction, sprintAction;
     Rigidbody body, groundBody, prevGroundBody;
@@ -48,8 +47,7 @@ public class PlayerController : MonoBehaviour
         OnValidate();
     }
 
-    void Update()
-    {
+    void Update() {
         playerInput = moveAction.ReadValue<Vector2>();
         jumpInput |= jumpAction.WasPressedThisFrame();
         sprintInput |= sprintAction.WasPressedThisFrame();
@@ -113,7 +111,7 @@ public class PlayerController : MonoBehaviour
                 jumpCooldownTimer = 0;
                 float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
                 float alignedSpeed = Vector3.Dot(velocity, contactNormal);
-                if (alignedSpeed > 0f) 
+                if (alignedSpeed > 0f)
                     jumpSpeed = Mathf.Max(jumpSpeed - alignedSpeed, 0f);
                 velocity += contactNormal * jumpSpeed;
             }
@@ -137,7 +135,7 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < collision.contactCount; i++) {
             Vector3 normal = collision.GetContact(i).normal;
             if (normal.y >= minGroundDotProduct) {
-                groundGraceTimer = 0; 
+                groundGraceTimer = 0;
                 if (angleJumps)
                     contactNormal = normal;
                 groundBody = collision.rigidbody;

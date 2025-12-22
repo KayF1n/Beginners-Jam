@@ -2,12 +2,9 @@
 using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks.Linq
-{
-    public static partial class UniTaskAsyncEnumerable
-    {
-        public static IUniTaskAsyncEnumerable<TSource> Concat<TSource>(this IUniTaskAsyncEnumerable<TSource> first, IUniTaskAsyncEnumerable<TSource> second)
-        {
+namespace Cysharp.Threading.Tasks.Linq {
+    public static partial class UniTaskAsyncEnumerable {
+        public static IUniTaskAsyncEnumerable<TSource> Concat<TSource>(this IUniTaskAsyncEnumerable<TSource> first, IUniTaskAsyncEnumerable<TSource> second) {
             Error.ThrowArgumentNullException(first, nameof(first));
             Error.ThrowArgumentNullException(second, nameof(second));
 
@@ -15,28 +12,23 @@ namespace Cysharp.Threading.Tasks.Linq
         }
     }
 
-    internal sealed class Concat<TSource> : IUniTaskAsyncEnumerable<TSource>
-    {
+    internal sealed class Concat<TSource> : IUniTaskAsyncEnumerable<TSource> {
         readonly IUniTaskAsyncEnumerable<TSource> first;
         readonly IUniTaskAsyncEnumerable<TSource> second;
 
-        public Concat(IUniTaskAsyncEnumerable<TSource> first, IUniTaskAsyncEnumerable<TSource> second)
-        {
+        public Concat(IUniTaskAsyncEnumerable<TSource> first, IUniTaskAsyncEnumerable<TSource> second) {
             this.first = first;
             this.second = second;
         }
 
-        public IUniTaskAsyncEnumerator<TSource> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        {
+        public IUniTaskAsyncEnumerator<TSource> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
             return new _Concat(first, second, cancellationToken);
         }
 
-        sealed class _Concat : MoveNextSource, IUniTaskAsyncEnumerator<TSource>
-        {
+        sealed class _Concat : MoveNextSource, IUniTaskAsyncEnumerator<TSource> {
             static readonly Action<object> MoveNextCoreDelegate = MoveNextCore;
 
-            enum IteratingState
-            {
+            enum IteratingState {
                 IteratingFirst,
                 IteratingSecond,
                 Complete
@@ -51,8 +43,7 @@ namespace Cysharp.Threading.Tasks.Linq
             IUniTaskAsyncEnumerator<TSource> enumerator;
             UniTask<bool>.Awaiter awaiter;
 
-            public _Concat(IUniTaskAsyncEnumerable<TSource> first, IUniTaskAsyncEnumerable<TSource> second, CancellationToken cancellationToken)
-            {
+            public _Concat(IUniTaskAsyncEnumerable<TSource> first, IUniTaskAsyncEnumerable<TSource> second, CancellationToken cancellationToken) {
                 this.first = first;
                 this.second = second;
                 this.cancellationToken = cancellationToken;
@@ -62,8 +53,7 @@ namespace Cysharp.Threading.Tasks.Linq
 
             public TSource Current { get; private set; }
 
-            public UniTask<bool> MoveNextAsync()
-            {
+            public UniTask<bool> MoveNextAsync() {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if (iteratingState == IteratingState.Complete) return CompletedTasks.False;
@@ -73,55 +63,38 @@ namespace Cysharp.Threading.Tasks.Linq
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-            void StartIterate()
-            {
-                if (enumerator == null)
-                {
-                    if (iteratingState == IteratingState.IteratingFirst)
-                    {
+            void StartIterate() {
+                if (enumerator == null) {
+                    if (iteratingState == IteratingState.IteratingFirst) {
                         enumerator = first.GetAsyncEnumerator(cancellationToken);
-                    }
-                    else if (iteratingState == IteratingState.IteratingSecond)
-                    {
+                    } else if (iteratingState == IteratingState.IteratingSecond) {
                         enumerator = second.GetAsyncEnumerator(cancellationToken);
                     }
                 }
 
-                try
-                {
+                try {
                     awaiter = enumerator.MoveNextAsync().GetAwaiter();
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                     return;
                 }
 
-                if (awaiter.IsCompleted)
-                {
+                if (awaiter.IsCompleted) {
                     MoveNextCoreDelegate(this);
-                }
-                else
-                {
+                } else {
                     awaiter.SourceOnCompleted(MoveNextCoreDelegate, this);
                 }
             }
 
-            static void MoveNextCore(object state)
-            {
+            static void MoveNextCore(object state) {
                 var self = (_Concat)state;
 
-                if (self.TryGetResult(self.awaiter, out var result))
-                {
-                    if (result)
-                    {
+                if (self.TryGetResult(self.awaiter, out var result)) {
+                    if (result) {
                         self.Current = self.enumerator.Current;
                         self.completionSource.TrySetResult(true);
-                    }
-                    else
-                    {
-                        if (self.iteratingState == IteratingState.IteratingFirst)
-                        {
+                    } else {
+                        if (self.iteratingState == IteratingState.IteratingFirst) {
                             self.RunSecondAfterDisposeAsync().Forget();
                             return;
                         }
@@ -132,28 +105,22 @@ namespace Cysharp.Threading.Tasks.Linq
                 }
             }
 
-            async UniTaskVoid RunSecondAfterDisposeAsync()
-            {
-                try
-                {
+            async UniTaskVoid RunSecondAfterDisposeAsync() {
+                try {
                     await enumerator.DisposeAsync();
                     enumerator = null;
                     awaiter = default;
                     iteratingState = IteratingState.IteratingSecond;
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     completionSource.TrySetException(ex);
                 }
 
                 StartIterate();
             }
 
-            public UniTask DisposeAsync()
-            {
+            public UniTask DisposeAsync() {
                 TaskTracker.RemoveTracking(this);
-                if (enumerator != null)
-                {
+                if (enumerator != null) {
                     return enumerator.DisposeAsync();
                 }
 

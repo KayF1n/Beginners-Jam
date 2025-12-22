@@ -1,8 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class EnemyController : MonoBehaviour
-{
+public class EnemyController : MonoBehaviour {
     Rigidbody body, groundBody, prevGroundBody;
     float minGroundDotProduct;
 
@@ -37,7 +36,7 @@ public class EnemyController : MonoBehaviour
 
     void Update() {
         Vector3 targetDirection = target.transform.position - transform.position;
-        targetVelocity =  targetDirection * maxSpeed;
+        targetVelocity = targetDirection * maxSpeed;
     }
 
     private void OnValidate() {

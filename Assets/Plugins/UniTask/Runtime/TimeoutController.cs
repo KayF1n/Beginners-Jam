@@ -3,20 +3,17 @@
 using System;
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks
-{
+namespace Cysharp.Threading.Tasks {
     // CancellationTokenSource itself can not reuse but CancelAfter(Timeout.InfiniteTimeSpan) allows reuse if did not reach timeout.
     // Similar discussion:
     // https://github.com/dotnet/runtime/issues/4694
     // https://github.com/dotnet/runtime/issues/48492
     // This TimeoutController emulate similar implementation, using CancelAfterSlim; to achieve zero allocation timeout.
 
-    public sealed class TimeoutController : IDisposable
-    {
+    public sealed class TimeoutController : IDisposable {
         readonly static Action<object> CancelCancellationTokenSourceStateDelegate = new Action<object>(CancelCancellationTokenSourceState);
 
-        static void CancelCancellationTokenSourceState(object state)
-        {
+        static void CancelCancellationTokenSourceState(object state) {
             var cts = (CancellationTokenSource)state;
             cts.Cancel();
         }
@@ -30,8 +27,7 @@ namespace Cysharp.Threading.Tasks
         readonly PlayerLoopTiming delayTiming;
         readonly CancellationTokenSource originalLinkCancellationTokenSource;
 
-        public TimeoutController(DelayType delayType = DelayType.DeltaTime, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update)
-        {
+        public TimeoutController(DelayType delayType = DelayType.DeltaTime, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update) {
             this.timeoutSource = new CancellationTokenSource();
             this.originalLinkCancellationTokenSource = null;
             this.linkedSource = null;
@@ -39,8 +35,7 @@ namespace Cysharp.Threading.Tasks
             this.delayTiming = delayTiming;
         }
 
-        public TimeoutController(CancellationTokenSource linkCancellationTokenSource, DelayType delayType = DelayType.DeltaTime, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update)
-        {
+        public TimeoutController(CancellationTokenSource linkCancellationTokenSource, DelayType delayType = DelayType.DeltaTime, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update) {
             this.timeoutSource = new CancellationTokenSource();
             this.originalLinkCancellationTokenSource = linkCancellationTokenSource;
             this.linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutSource.Token, linkCancellationTokenSource.Token);
@@ -48,25 +43,20 @@ namespace Cysharp.Threading.Tasks
             this.delayTiming = delayTiming;
         }
 
-        public CancellationToken Timeout(int millisecondsTimeout)
-        {
+        public CancellationToken Timeout(int millisecondsTimeout) {
             return Timeout(TimeSpan.FromMilliseconds(millisecondsTimeout));
         }
 
-        public CancellationToken Timeout(TimeSpan timeout)
-        {
-            if (originalLinkCancellationTokenSource != null && originalLinkCancellationTokenSource.IsCancellationRequested)
-            {
+        public CancellationToken Timeout(TimeSpan timeout) {
+            if (originalLinkCancellationTokenSource != null && originalLinkCancellationTokenSource.IsCancellationRequested) {
                 return originalLinkCancellationTokenSource.Token;
             }
 
             // Timeouted, create new source and timer.
-            if (timeoutSource.IsCancellationRequested)
-            {
+            if (timeoutSource.IsCancellationRequested) {
                 timeoutSource.Dispose();
                 timeoutSource = new CancellationTokenSource();
-                if (linkedSource != null)
-                {
+                if (linkedSource != null) {
                     this.linkedSource.Cancel();
                     this.linkedSource.Dispose();
                     this.linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutSource.Token, originalLinkCancellationTokenSource.Token);
@@ -78,50 +68,40 @@ namespace Cysharp.Threading.Tasks
 
             var useSource = (linkedSource != null) ? linkedSource : timeoutSource;
             var token = useSource.Token;
-            if (timer == null)
-            {
+            if (timer == null) {
                 // Timer complete => timeoutSource.Cancel() -> linkedSource will be canceled.
                 // (linked)token is canceled => stop timer
                 timer = PlayerLoopTimer.StartNew(timeout, false, delayType, delayTiming, token, CancelCancellationTokenSourceStateDelegate, timeoutSource);
-            }
-            else
-            {
+            } else {
                 timer.Restart(timeout);
             }
 
             return token;
         }
 
-        public bool IsTimeout()
-        {
+        public bool IsTimeout() {
             return timeoutSource.IsCancellationRequested;
         }
 
-        public void Reset()
-        {
+        public void Reset() {
             timer?.Stop();
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             if (isDisposed) return;
 
-            try
-            {
+            try {
                 // stop timer.
                 timer?.Dispose();
 
                 // cancel and dispose.
                 timeoutSource.Cancel();
                 timeoutSource.Dispose();
-                if (linkedSource != null)
-                {
+                if (linkedSource != null) {
                     linkedSource.Cancel();
                     linkedSource.Dispose();
                 }
-            }
-            finally
-            {
+            } finally {
                 isDisposed = true;
             }
         }

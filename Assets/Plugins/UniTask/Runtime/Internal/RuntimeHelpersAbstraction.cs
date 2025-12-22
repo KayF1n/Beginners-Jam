@@ -5,18 +5,14 @@ using System;
 using UnityEngine;
 #endif
 
-namespace Cysharp.Threading.Tasks.Internal
-{
-    internal static class RuntimeHelpersAbstraction
-    {
+namespace Cysharp.Threading.Tasks.Internal {
+    internal static class RuntimeHelpersAbstraction {
         // If we can use RuntimeHelpers.IsReferenceOrContainsReferences(.NET Core 2.0), use it.
-        public static bool IsWellKnownNoReferenceContainsType<T>()
-        {
+        public static bool IsWellKnownNoReferenceContainsType<T>() {
             return WellKnownNoReferenceContainsType<T>.IsWellKnownType;
         }
 
-        static bool WellKnownNoReferenceContainsTypeInitialize(Type t)
-        {
+        static bool WellKnownNoReferenceContainsTypeInitialize(Type t) {
             // The primitive types are Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, IntPtr, UIntPtr, Char, Double, and Single.
             if (t.IsPrimitive) return true;
 
@@ -27,8 +23,7 @@ namespace Cysharp.Threading.Tasks.Internal
             if (t == typeof(decimal)) return true;
 
             // unwrap nullable
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)) {
                 return WellKnownNoReferenceContainsTypeInitialize(t.GetGenericArguments()[0]);
             }
 
@@ -50,12 +45,10 @@ namespace Cysharp.Threading.Tasks.Internal
             return false;
         }
 
-        static class WellKnownNoReferenceContainsType<T>
-        {
+        static class WellKnownNoReferenceContainsType<T> {
             public static readonly bool IsWellKnownType;
 
-            static WellKnownNoReferenceContainsType()
-            {
+            static WellKnownNoReferenceContainsType() {
                 IsWellKnownType = WellKnownNoReferenceContainsTypeInitialize(typeof(T));
             }
         }
